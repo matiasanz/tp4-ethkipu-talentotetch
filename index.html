@@ -48,11 +48,11 @@
                 <table>
                     <tr>
                         <td>Token A</td>
-                        <td>$...</td><!--TODO: Traer de contrato-->
+                        <td>$<span id="balance-tka">loading...</span></td><!--TODO: Traer de contrato-->
                     </tr>
                     <tr>
                         <td>Token B</td>
-                        <td>$...</td><!--TODO: Traer de contrato-->
+                        <td>$<span id="balance-tkb">loading...</span></td><!--TODO: Traer de contrato-->
                     </tr>
                 </table>
             </section>
@@ -97,7 +97,7 @@
                     </div>
                     <fieldset>
                         <div>
-                            <input type="number" placeholder="Ammount...">
+                            <input type="number" placeholder="Ammount..." min="0">
                             <select>
                                 <option>TK</option>
                                 <option>Gweis</option>
@@ -129,7 +129,7 @@
                         <label for="liquidity--input--verb--remove">Remove</label>
                     </div>
                     <div>
-                        <input type="number" placeholder="Ammount...">
+                        <input type="number" placeholder="Ammount..." min="0">
                         <select>
                             <option>TK</option>
                             <option>Gweis</option>
@@ -152,7 +152,7 @@
                     <input type="text" placeholder="To...">
                     <br>
                     <div>
-                        <input type="number" placeholder="Ammount...">
+                        <input type="number" placeholder="Ammount..." min="0">
                         <select>
                             <option>TK</option>
                             <option>Gweis</option>
