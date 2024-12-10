@@ -26,10 +26,23 @@ const TokenB = new Token(
     18
 )
 
-let signer = null; //Usuario
 
+
+let signer      = null
+let tkaContract = null
+let tkbContract = null
+let simpleDExContract = null
 
 // Login
+
+
+    function reloadBalances(address){
+        tkaContract.balanceOf(address)
+            .then( balance => document.getElementById('balance-tka').innerText = balance/TokenA.decimals)
+        tkbContract.balanceOf(address)
+            .then(balance => document.getElementById('balance-tkb').innerText = balance/TokenB.decimals)
+    }
+
     async function onClickBtnLogin() {
         if (!window.ethereum) {
             alert('MetaMask no está instalado');
@@ -44,22 +57,18 @@ let signer = null; //Usuario
         const address = await signer.getAddress();
 
         //const scrollSepoliaProvider = new ethers.providers.JsonRpcProvider('https://scroll-sepolia-rpc.publicnode.com')
-        const tkaContract = new ethers.Contract(TokenA.address, TokenA.abi, signer)
-        tkaContract.balanceOf(address)
-            .then( balance => document.getElementById('balance-tka').innerText = balance/TokenA.decimals)
+        tkaContract = new ethers.Contract(TokenA.address, TokenA.abi, signer)
+        tkbContract = new ethers.Contract(TokenB.address, TokenB.abi, signer)
 
+        reloadBalances(address)
 
-        const tkbContract = new ethers.Contract(TokenB.address, TokenB.abi, signer)
-        tkbContract.balanceOf(address)
-            .then(balance => document.getElementById('balance-tkb').innerText = balance/TokenB.decimals)
-
-
-        const simpleDExContract = new ethers.Contract(
+        simpleDExContract = new ethers.Contract(
             '0x0718c693044DB2A66159bA3D97ADdd6bCCdB0d98',
             [{"inputs":[{"internalType":"contract ERC20","name":"_tokenA","type":"address"},{"internalType":"contract ERC20","name":"_tokenB","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedAForB","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedBForA","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKA","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKB","type":"uint256"}],"name":"UpdatedLiquidity","type":"event"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"addLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenA","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenB","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"}],"name":"getPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"removeLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountAIn","type":"uint256"}],"name":"swapAForB","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountBIn","type":"uint256"}],"name":"swapBForA","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}],
             signer
         )
 
+        
         simpleDExContract.getLiquidityPoolTokenA()
             .then(lp => document.getElementById('lp-tka').innerText = lp/TokenA.decimals)
 
@@ -104,6 +113,34 @@ let signer = null; //Usuario
 
 
 // Tokens swap
+    function onSubmitFormSwapToken(form, event){
+        event.preventDefault()
+        const elements = form.elements
+
+        const ammount = elements['swapAmmount'].value
+        const tokenIn =  document.getElementById('form-swap--tokenIn--id').innerText
+        const unit = elements['swapUnit'].value
+
+        console.log(JSON.stringify({tokenIn, ammount, unit}))
+        let promise = null; 
+        let decimals = null
+        if(tokenIn == 'A'){
+            decimals = TokenA.decimals
+            promise = simpleDExContract.swapAForB
+        } else{
+            decimals = TokenB.decimals
+            promise = simpleDExContract.swapBForA
+        }
+
+        const adjustment = unit === 'Gweis'? 1: Math.pow(10, decimals)
+        console.log(ammount*adjustment)
+        promise(ammount*adjustment).then(
+            async(tx) => {
+                await tx.wait()
+            }
+        ).catch(err => document.getElementById('swap-error').innerText = err.reason)
+    }
+
     function onClickBtnSwitchTokenToSwap(){
         const tokenIn = document.getElementById('form-swap--tokenIn--id')
         const tokenOut = document.getElementById('form-swap--tokenOut--id')
@@ -119,3 +156,36 @@ let signer = null; //Usuario
     //Setup inicial
     onClickBtnSwitchTokenToSwap()
 
+    function onSubmitFormManageLiquidity(form, event){
+        event.preventDefault()
+        const elements = form.elements
+        let liquidityAmmount = elements['liquidityAmmount'].value
+        const liquidityUnit = elements['liquidityUnit'].value
+        const liquidityVerb = elements['liquidityVerb'].value
+        const liquidityToken = elements['liquidityToken'].value
+
+        const promise = liquidityVerb === 'Add'? 
+            simpleDExContract.addLiquidity: simpleDExContract.removeLiquidity
+
+        let decimals = null
+        if(liquidityToken == 'A'){
+            decimals = TokenA.decimals
+        } else{
+            decimals = TokenB.decimals
+        }
+        
+        const adjustment = liquidityUnit === 'Gweis'? 1: Math.pow(10, decimals)
+        liquidityAmmount*=adjustment
+        
+        const args = liquidityToken == TokenA.name?
+            [liquidityAmmount, 0]: [0, liquidityAmmount]
+
+        promise(...args)
+            .then(tx=>{
+                tx.wait()
+                reloadBalances()
+            })
+            .catch(err => {
+                document.getElementById('liquidity-error').innerText = err.reason
+            })
+    }

@@ -54,3 +54,8 @@ fieldset{
         margin: 0;
     }
 }
+
+.error-msg{
+    color: red;
+    font-style: italic;
+}

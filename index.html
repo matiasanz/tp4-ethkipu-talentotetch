@@ -70,15 +70,15 @@
         <section>
             <h2>Swap money</h2>
             <div>
-                <form>
+                <form onsubmit="onSubmitFormSwapToken(this, event)">
                     <div class="fieldset--title">
                         <h3>Swap <span id="form-swap--tokenIn--id"></span> for <span id="form-swap--tokenOut--id"></span></h3>
                         <button type="button" title="Switch token to swap" onclick="onClickBtnSwitchTokenToSwap()">⥃</button>
                     </div>
                     <fieldset>
                         <div>
-                            <input type="number" placeholder="Ammount..." min="0">
-                            <select>
+                            <input required name="swapAmmount" type="number" placeholder="Ammount..." min="0">
+                            <select name="swapUnit">
                                 <option>TK</option>
                                 <option>Gweis</option>
                             </select>
@@ -86,31 +86,32 @@
                         <br>
                         <input type="submit" value="Confirm">
                     </fieldset>
+                    <p id="swap-error" class="error-msg"></p>
                 </form>
             </div>
         </section>
         <section>
             <h2>Owner's Tools</h2>
-            <form>
+            <form onsubmit="onSubmitFormManageLiquidity(this, event)">
                 <div class="fieldset--title">
                     <h3>
                         Manage liquidity
                     </h3>
-                    <select>
+                    <select name="liquidityToken">
                         <option>Token A</option>
                         <option>Token B</option>
                     </select>
                 </div>
                 <fieldset>
                     <div>
-                        <input name="liquidity--input--verb" type="radio" id="liquidity--input--verb--add">
+                        <input required name="liquidityVerb" type="radio" id="liquidity--input--verb--add">
                         <label for="liquidity--input--verb--add">Add</label>
-                        <input name="liquidity--input--verb" type="radio" id="liquidity--input--verb--remove">
+                        <input name="liquidityVerb" type="radio" id="liquidity--input--verb--remove">
                         <label for="liquidity--input--verb--remove">Remove</label>
                     </div>
                     <div>
-                        <input type="number" placeholder="Ammount..." min="0">
-                        <select>
+                        <input required name="liquidityAmmount" type="number" placeholder="Ammount..." min="0">
+                        <select name="liquidityUnit">
                             <option>TK</option>
                             <option>Gweis</option>
                         </select>
@@ -118,6 +119,7 @@
                     <br>
                     <input type="submit" value="Confirm">
                 </fieldset>
+                <p id="liquidity-error" class="error-msg"></p>
             </form>
 
             <form>
@@ -129,10 +131,10 @@
                     </select>
                 </div>
                 <fieldset>
-                    <input type="text" placeholder="To...">
+                    <input required type="text" placeholder="To...">
                     <br>
                     <div>
-                        <input type="number" placeholder="Ammount..." min="0">
+                        <input required type="number" placeholder="Ammount..." min="0">
                         <select>
                             <option>TK</option>
                             <option>Gweis</option>
@@ -141,6 +143,7 @@
                     <br>
                     <input type="submit" value="Confirm">
                 </fieldset>
+                <p id="mint-error" class="error-msg"></p>
             </form>
         </section>
     </div>
