@@ -13,33 +13,7 @@
     </nav>
     
     <div id="content-alt">
-        <section>
-            <h2>Liquidity</h2>
-            <table>
-                <tr>
-                    <td>Token A</td>
-                    <td>$...</td><!--TODO: Traer de contrato-->
-                </tr>
-                <tr>
-                    <td>Token B</td>
-                    <td>$...</td><!--TODO: Traer de contrato-->
-                </tr>
-            </table>
-        </section>
-
-        <section>
-            <h2>Prices</h2>
-            <table>
-                <tr>
-                    <td>Token A</td>
-                    <td>$...</td><!--TODO: Traer de contrato-->
-                </tr>
-                <tr>
-                    <td>Token B</td>
-                    <td>$...</td><!--TODO: Traer de contrato-->
-                </tr>
-            </table>
-        </section>
+        <p>This page is a descentralized tool for exchanging tokens of type A and B</p>
     </div>
     <div id="content">
         <div>
@@ -62,11 +36,11 @@
                 <table>
                     <tr>
                         <td>Token A</td>
-                        <td>$...</td><!--TODO: Traer de contrato-->
+                        <td>$<span id="lp-tka">loading...</span></td><!--TODO: Traer de contrato-->
                     </tr>
                     <tr>
                         <td>Token B</td>
-                        <td>$...</td><!--TODO: Traer de contrato-->
+                        <td>$<span id="lp-tkb">loading...</span></td><!--TODO: Traer de contrato-->
                     </tr>
                 </table>
             </section>
@@ -76,11 +50,17 @@
                 <table>
                     <tr>
                         <td>Token A</td>
-                        <td>$...</td><!--TODO: Traer de contrato-->
+                        <td>$<span id="price-tka">loading...</span></td><!--TODO: Traer de contrato-->
+                    </tr>
+                    <tr>
+                        <td id="price-tka-msg" colspan="2"></td>
                     </tr>
                     <tr>
                         <td>Token B</td>
-                        <td>$...</td><!--TODO: Traer de contrato-->
+                        <td>$<span id="price-tkb">loading...</span></td><!--TODO: Traer de contrato-->
+                    </tr>
+                    <tr>
+                        <td id="price-tkb-msg" colspan="2"></td>
                     </tr>
                 </table>
             </section>
