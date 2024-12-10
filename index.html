@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple DEx</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <nav id="navbar">
+        <h1>Simple DEx</h1>
+        <div id="navbar--login"></div>
+    </nav>
+    
+    <div id="content-alt">
+        <section>
+            <h2>Liquidity</h2>
+            <table>
+                <tr>
+                    <td>Token A</td>
+                    <td>$...</td><!--TODO: Traer de contrato-->
+                </tr>
+                <tr>
+                    <td>Token B</td>
+                    <td>$...</td><!--TODO: Traer de contrato-->
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>Prices</h2>
+            <table>
+                <tr>
+                    <td>Token A</td>
+                    <td>$...</td><!--TODO: Traer de contrato-->
+                </tr>
+                <tr>
+                    <td>Token B</td>
+                    <td>$...</td><!--TODO: Traer de contrato-->
+                </tr>
+            </table>
+        </section>
+    </div>
+    <div id="content">
+        <div>
+            <section>
+                <h2>Balance</h2>
+                <table>
+                    <tr>
+                        <td>Token A</td>
+                        <td>$...</td><!--TODO: Traer de contrato-->
+                    </tr>
+                    <tr>
+                        <td>Token B</td>
+                        <td>$...</td><!--TODO: Traer de contrato-->
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Liquidity</h2>
+                <table>
+                    <tr>
+                        <td>Token A</td>
+                        <td>$...</td><!--TODO: Traer de contrato-->
+                    </tr>
+                    <tr>
+                        <td>Token B</td>
+                        <td>$...</td><!--TODO: Traer de contrato-->
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Prices</h2>
+                <table>
+                    <tr>
+                        <td>Token A</td>
+                        <td>$...</td><!--TODO: Traer de contrato-->
+                    </tr>
+                    <tr>
+                        <td>Token B</td>
+                        <td>$...</td><!--TODO: Traer de contrato-->
+                    </tr>
+                </table>
+            </section>
+
+        </div>
+
+        <section>
+            <h2>Swap money</h2>
+            <div>
+                <form>
+                    <div class="fieldset--title">
+                        <h3>Swap <span id="form-swap--tokenIn--id"></span> for <span id="form-swap--tokenOut--id"></span></h3>
+                        <button type="button" title="Switch token to swap" onclick="onClickBtnSwitchTokenToSwap()">⥃</button>
+                    </div>
+                    <fieldset>
+                        <div>
+                            <input type="number" placeholder="Ammount...">
+                            <select>
+                                <option>TK</option>
+                                <option>Gweis</option>
+                            </select>
+                        </div>
+                        <br>
+                        <input type="submit" value="Confirm">
+                    </fieldset>
+                </form>
+            </div>
+        </section>
+        <section>
+            <h2>Owner's Tools</h2>
+            <form>
+                <div class="fieldset--title">
+                    <h3>
+                        Manage liquidity
+                    </h3>
+                    <select>
+                        <option>Token A</option>
+                        <option>Token B</option>
+                    </select>
+                </div>
+                <fieldset>
+                    <div>
+                        <input name="liquidity--input--verb" type="radio" id="liquidity--input--verb--add">
+                        <label for="liquidity--input--verb--add">Add</label>
+                        <input name="liquidity--input--verb" type="radio" id="liquidity--input--verb--remove">
+                        <label for="liquidity--input--verb--remove">Remove</label>
+                    </div>
+                    <div>
+                        <input type="number" placeholder="Ammount...">
+                        <select>
+                            <option>TK</option>
+                            <option>Gweis</option>
+                        </select>
+                    </div>
+                    <br>
+                    <input type="submit" value="Confirm">
+                </fieldset>
+            </form>
+
+            <form>
+                <div class="fieldset--title">
+                    <h3>Mint money</h3>
+                    <select>
+                        <option>Token A</option>
+                        <option>Token B</option>
+                    </select>
+                </div>
+                <fieldset>
+                    <input type="text" placeholder="To...">
+                    <br>
+                    <div>
+                        <input type="number" placeholder="Ammount...">
+                        <select>
+                            <option>TK</option>
+                            <option>Gweis</option>
+                        </select>
+                    </div>
+                    <br>
+                    <input type="submit" value="Confirm">
+                </fieldset>
+            </form>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>

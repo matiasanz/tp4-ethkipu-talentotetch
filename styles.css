@@ -1,0 +1,56 @@
+h1{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin-left: .5em;
+}
+
+h2{
+    text-align: center;
+    font-variant-caps: small-caps;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+nav{
+    background-color: beige;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h3, h4{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: inline;
+}
+
+button, input[type=submit], input[type=radio], label, select{
+    cursor: pointer;
+}
+
+#content, #content-alt{
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#content[hidden], #content-alt[hidden]{
+    display: none !important;
+}
+    
+form{
+    margin-bottom: 1em;
+}
+
+fieldset{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.fieldset--title{
+    display: flex;
+    justify-content: space-between;
+    h3{
+        padding: 0;
+        margin: 0;
+    }
+}
