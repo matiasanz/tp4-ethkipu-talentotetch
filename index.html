@@ -18,57 +18,60 @@
     <div id="content">
         <div>
             <section>
-                <h2>Balance</h2>
+                <h2>Account's status</h2>
                 <table>
-                    <tr>
-                        <td>Token A</td>
-                        <td>$<span id="balance-tka">loading...</span></td><!--TODO: Traer de contrato-->
-                    </tr>
-                    <tr>
-                        <td>Token B</td>
-                        <td>$<span id="balance-tkb">loading...</span></td><!--TODO: Traer de contrato-->
-                    </tr>
+                    <thead>
+                        <th></th>
+                        <th>Balance</th>
+                        <th>Allowance</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Token A</td>
+                            <td><span id="balance-tka">loading...</span> TKA</td>
+                            <td><span id="allowance-tka">loading...</span> TKA</td>
+                        </tr>
+                        <tr>
+                            <td>Token B</td>
+                            <td><span id="balance-tkb">loading...</span> TKB</td>
+                            <td><span id="allowance-tkb">loading...</span> TKA</td>
+                        </tr>
+                    </tbody>
                 </table>
             </section>
 
             <section>
-                <h2>Liquidity</h2>
+                <h2>Liquidity Pools</h2>
                 <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Liquidity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
                     <tr>
                         <td>Token A</td>
-                        <td>$<span id="lp-tka">loading...</span></td><!--TODO: Traer de contrato-->
+                        <td><span id="lp-tka">loading...</span> TKA</td>
+                        <td><span id="price-tka">loading...</span></td>
+                    </tr>
+                    <tr>
+                        <td id="price-tka-msg" colspan="3"></td>
                     </tr>
                     <tr>
                         <td>Token B</td>
-                        <td>$<span id="lp-tkb">loading...</span></td><!--TODO: Traer de contrato-->
+                        <td><span id="lp-tkb">loading...</span> TKB</td>
+                        <td><span id="price-tkb">loading...</span></td>
+                    </tr>
+                    <tr>
+                        <td id="price-tkb-msg" colspan="3"></td>
                     </tr>
                 </table>
             </section>
-
-            <section>
-                <h2>Prices</h2>
-                <table>
-                    <tr>
-                        <td>Token A</td>
-                        <td>$<span id="price-tka">loading...</span></td><!--TODO: Traer de contrato-->
-                    </tr>
-                    <tr>
-                        <td id="price-tka-msg" colspan="2"></td>
-                    </tr>
-                    <tr>
-                        <td>Token B</td>
-                        <td>$<span id="price-tkb">loading...</span></td><!--TODO: Traer de contrato-->
-                    </tr>
-                    <tr>
-                        <td id="price-tkb-msg" colspan="2"></td>
-                    </tr>
-                </table>
-            </section>
-
         </div>
 
         <section>
-            <h2>Swap money</h2>
+            <h2>Exchanging</h2>
             <div>
                 <form onsubmit="onSubmitFormSwapToken(this, event)">
                     <div class="fieldset--title">
@@ -80,7 +83,7 @@
                             <input required name="swapAmmount" type="number" placeholder="Ammount..." min="0">
                             <select name="swapUnit">
                                 <option>TK</option>
-                                <option>Gweis</option>
+                                <option>Weis</option>
                             </select>
                         </div>
                         <br>
@@ -104,16 +107,16 @@
                 </div>
                 <fieldset>
                     <div>
-                        <input required name="liquidityVerb" type="radio" id="liquidity--input--verb--add">
+                        <input required name="liquidityVerb" type="radio" value="Add" id="liquidity--input--verb--add">
                         <label for="liquidity--input--verb--add">Add</label>
-                        <input name="liquidityVerb" type="radio" id="liquidity--input--verb--remove">
+                        <input name="liquidityVerb" type="radio" value="Remove" id="liquidity--input--verb--remove">
                         <label for="liquidity--input--verb--remove">Remove</label>
                     </div>
                     <div>
                         <input required name="liquidityAmmount" type="number" placeholder="Ammount..." min="0">
                         <select name="liquidityUnit">
                             <option>TK</option>
-                            <option>Gweis</option>
+                            <option>Weis</option>
                         </select>
                     </div>
                     <br>
@@ -122,22 +125,22 @@
                 <p id="liquidity-error" class="error-msg"></p>
             </form>
 
-            <form>
+            <form onsubmit="onSubmitFormMintMoney(this, event)">
                 <div class="fieldset--title">
                     <h3>Mint money</h3>
-                    <select>
+                    <select name="mintToken">
                         <option>Token A</option>
                         <option>Token B</option>
                     </select>
                 </div>
                 <fieldset>
-                    <input required type="text" placeholder="To...">
+                    <input required name="mintReciever" type="text" placeholder="To...">
                     <br>
                     <div>
-                        <input required type="number" placeholder="Ammount..." min="0">
-                        <select>
+                        <input required name="mintAmmount" type="number" placeholder="Ammount..." min="0">
+                        <select name="mintUnit">
                             <option>TK</option>
-                            <option>Gweis</option>
+                            <option>Weis</option>
                         </select>
                     </div>
                     <br>

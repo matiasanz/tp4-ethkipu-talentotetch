@@ -1,3 +1,5 @@
+const SIMPLE_DEx_ADDRESS = '0x0718c693044DB2A66159bA3D97ADdd6bCCdB0d98'
+
 class Token{
     constructor(address, abi, name, unit, decimals, ){
         this.address = address
@@ -38,9 +40,9 @@ let simpleDExContract = null
 
     function reloadBalances(address){
         tkaContract.balanceOf(address)
-            .then( balance => document.getElementById('balance-tka').innerText = balance/TokenA.decimals)
+            .then( balance => document.getElementById('balance-tka').innerText = balance/Math.pow(10, TokenA.decimals))
         tkbContract.balanceOf(address)
-            .then(balance => document.getElementById('balance-tkb').innerText = balance/TokenB.decimals)
+            .then(balance => document.getElementById('balance-tkb').innerText = balance/Math.pow(10, TokenB.decimals))
     }
 
     async function onClickBtnLogin() {
@@ -62,8 +64,13 @@ let simpleDExContract = null
 
         reloadBalances(address)
 
+        tkaContract.allowance(address, SIMPLE_DEx_ADDRESS)
+            .then( allowance => document.getElementById('allowance-tka').innerText = allowance/Math.pow(10, TokenA.decimals))
+        tkbContract.allowance(address, SIMPLE_DEx_ADDRESS)
+            .then(allowance => document.getElementById('allowance-tkb').innerText = allowance/Math.pow(10, TokenB.decimals))
+
         simpleDExContract = new ethers.Contract(
-            '0x0718c693044DB2A66159bA3D97ADdd6bCCdB0d98',
+            SIMPLE_DEx_ADDRESS,
             [{"inputs":[{"internalType":"contract ERC20","name":"_tokenA","type":"address"},{"internalType":"contract ERC20","name":"_tokenB","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedAForB","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedBForA","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKA","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKB","type":"uint256"}],"name":"UpdatedLiquidity","type":"event"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"addLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenA","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenB","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"}],"name":"getPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"removeLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountAIn","type":"uint256"}],"name":"swapAForB","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountBIn","type":"uint256"}],"name":"swapBForA","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}],
             signer
         )
@@ -90,6 +97,16 @@ let simpleDExContract = null
                 document.getElementById('price-tkb-msg').innerText = err.reason
             })
 
+        
+
+        /*
+//TODO        const image = await provider.getAvatar()
+//          <img alt="avatar" src="">${image}</img>
+*/ 
+/*
+        const resolver = await provider.getResolver(address)
+        const image = await resolver.getText('avatar') 
+*/
         document.getElementById("navbar--login").innerHTML = `
             <h4>${address}</h4>
             <button onclick="onClickBtnLogout()">Disconnect my wallet</button>
@@ -132,7 +149,7 @@ let simpleDExContract = null
             promise = simpleDExContract.swapBForA
         }
 
-        const adjustment = unit === 'Gweis'? 1: Math.pow(10, decimals)
+        const adjustment = unit === 'Weis'? 1: Math.pow(10, decimals)
         console.log(ammount*adjustment)
         promise(ammount*adjustment).then(
             async(tx) => {
@@ -163,7 +180,7 @@ let simpleDExContract = null
         const liquidityUnit = elements['liquidityUnit'].value
         const liquidityVerb = elements['liquidityVerb'].value
         const liquidityToken = elements['liquidityToken'].value
-
+        
         const promise = liquidityVerb === 'Add'? 
             simpleDExContract.addLiquidity: simpleDExContract.removeLiquidity
 
@@ -174,7 +191,7 @@ let simpleDExContract = null
             decimals = TokenB.decimals
         }
         
-        const adjustment = liquidityUnit === 'Gweis'? 1: Math.pow(10, decimals)
+        const adjustment = liquidityUnit === 'Weis'? 1: Math.pow(10, decimals)
         liquidityAmmount*=adjustment
         
         const args = liquidityToken == TokenA.name?
@@ -189,3 +206,33 @@ let simpleDExContract = null
                 document.getElementById('liquidity-error').innerText = err.reason
             })
     }
+/*
+async function Escribir() {
+    let value2Change = document.getElementById("value2change").value;
+    alert(value2Change);
+
+    const tx = await greeterContract.setGreeting(value2Change);
+    await tx.wait();
+}*/
+
+function onSubmitFormMintMoney(form, event){
+    event.preventDefault()
+
+    const elements = form.elements
+    const mintUnit = elements['mintUnit'].value
+    const mintToken = elements['mintToken'].value
+    const mintReciever = elements['mintReciever'].value
+    const mintAmmount = elements['mintAmmount'].value
+
+    const token = mintToken === TokenA.name? tkaContract: tkbContract
+    
+    const adjustment = mintUnit === 'Weis'? 1: Math.pow(10, token.decimals)
+    
+    token.mint(mintReciever, mintAmmount*adjustment)
+        .then(tx=>{
+            tx.wait()
+        }).then(()=>reloadBalances())
+        .catch(err => {
+            document.getElementById('mint-error').innerText = err.reason
+        })
+}
