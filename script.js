@@ -193,14 +193,9 @@ function tkToWeis(ammountInTK, token){
         const promise = liquidityVerb === 'Add'? 
             simpleDExContract.addLiquidity: simpleDExContract.removeLiquidity
 
-        let decimals = null
-        if(liquidityToken == 'A'){
-            decimals = TokenA.decimals
-        } else{
-            decimals = TokenB.decimals
-        }
+        let token = liquidityToken == 'A'? TokenA: TokenB
         
-        const adjustedAmmount = liquidityUnit === 'Weis'? ammount: tkToWeis(ammount)
+        const adjustedAmmount = liquidityUnit === 'Weis'? liquidityAmmount: tkToWeis(liquidityAmmount, token)
         
         const args = liquidityToken == TokenA.name?
             [adjustedAmmount, 0]: [0, adjustedAmmount]
@@ -234,7 +229,7 @@ function onSubmitFormMintMoney(form, event){
 
     const token = mintToken === TokenA.name? tkaContract: tkbContract
     
-    const adjustedAmmount = mintUnit === 'Weis'? mintAmmount: weisToTK(mintAmmount, mintToken === TokenA.name? TokenA: TokenB)
+    const adjustedAmmount = mintUnit === 'Weis'? mintAmmount: tkToWeis(mintAmmount, mintToken === TokenA.name? TokenA: TokenB)
     
     token.mint(mintReciever, adjustedAmmount)
         .then(tx=>{

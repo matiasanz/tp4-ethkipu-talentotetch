@@ -1,22 +1,50 @@
+body{
+    background: url('./assets/background.jpg') no-repeat;
+    background-size: cover;
+}
+
+h2, h3{
+    text-shadow: black 1px 1px 1px;
+}
+
+p{
+    font-size: large;
+    transform: rotateX(15deg);
+    text-shadow: black 1px 1px 1px;
+    color: goldenrod;
+}
+
+table, fieldset{
+    background-color: #B4B4B4;
+}
+
 h1{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     margin-left: .5em;
+    text-shadow: black 1px 1px 1px;
 }
 
 h2{
     text-align: center;
     font-variant-caps: small-caps;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: goldenrod;
 }
 
+
 nav{
-    background-color: beige;
+    background-color: rgba(240, 248, 255, .8);
+    box-shadow: black 1px 1px 1px;
+    padding-right: .85em;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
+h3{
+    color: whitesmoke;
+}
 h3, h4{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: inline;
