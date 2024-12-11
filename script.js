@@ -37,12 +37,21 @@ let simpleDExContract = null
 
 // Login
 
+function weisToTK(ammountInWeis, token){
+    return ethers.utils.formatUnits(ammountInWeis, token.decimals)
+}
+
+function tkToWeis(ammountInTK, token){
+    return ethers.utils.parseUnits(ammountInTK, token.decimals)
+}
+
+
 
     function reloadBalances(address){
         tkaContract.balanceOf(address)
-            .then( balance => document.getElementById('balance-tka').innerText = balance/Math.pow(10, TokenA.decimals))
+            .then( balance => document.getElementById('balance-tka').innerText = weisToTK(balance, TokenA))
         tkbContract.balanceOf(address)
-            .then(balance => document.getElementById('balance-tkb').innerText = balance/Math.pow(10, TokenB.decimals))
+            .then(balance => document.getElementById('balance-tkb').innerText = weisToTK(balance, TokenB))
     }
 
     async function onClickBtnLogin() {
@@ -65,9 +74,9 @@ let simpleDExContract = null
         reloadBalances(address)
 
         tkaContract.allowance(address, SIMPLE_DEx_ADDRESS)
-            .then( allowance => document.getElementById('allowance-tka').innerText = allowance/Math.pow(10, TokenA.decimals))
+            .then( allowance => document.getElementById('allowance-tka').innerText = weisToTK(allowance, TokenA))
         tkbContract.allowance(address, SIMPLE_DEx_ADDRESS)
-            .then(allowance => document.getElementById('allowance-tkb').innerText = allowance/Math.pow(10, TokenB.decimals))
+            .then(allowance => document.getElementById('allowance-tkb').innerText = weisToTK(allowance, TokenB))
 
         simpleDExContract = new ethers.Contract(
             SIMPLE_DEx_ADDRESS,
@@ -140,18 +149,18 @@ let simpleDExContract = null
 
         console.log(JSON.stringify({tokenIn, ammount, unit}))
         let promise = null; 
-        let decimals = null
+        let token = null
         if(tokenIn == 'A'){
-            decimals = TokenA.decimals
+            token = TokenA
             promise = simpleDExContract.swapAForB
         } else{
-            decimals = TokenB.decimals
+            token = TokenB
             promise = simpleDExContract.swapBForA
         }
 
-        const adjustment = unit === 'Weis'? 1: Math.pow(10, decimals)
-        console.log(ammount*adjustment)
-        promise(ammount*adjustment).then(
+        const adjustedAmmount = unit === 'Weis'? ammount: tkToWeis(ammount, token)
+        
+        promise(adjustedAmmount).then(
             async(tx) => {
                 await tx.wait()
             }
@@ -191,11 +200,10 @@ let simpleDExContract = null
             decimals = TokenB.decimals
         }
         
-        const adjustment = liquidityUnit === 'Weis'? 1: Math.pow(10, decimals)
-        liquidityAmmount*=adjustment
+        const adjustedAmmount = liquidityUnit === 'Weis'? ammount: tkToWeis(ammount)
         
         const args = liquidityToken == TokenA.name?
-            [liquidityAmmount, 0]: [0, liquidityAmmount]
+            [adjustedAmmount, 0]: [0, adjustedAmmount]
 
         promise(...args)
             .then(tx=>{
@@ -226,9 +234,9 @@ function onSubmitFormMintMoney(form, event){
 
     const token = mintToken === TokenA.name? tkaContract: tkbContract
     
-    const adjustment = mintUnit === 'Weis'? 1: Math.pow(10, token.decimals)
+    const adjustedAmmount = mintUnit === 'Weis'? mintAmmount: weisToTK(mintAmmount, mintToken === TokenA.name? TokenA: TokenB)
     
-    token.mint(mintReciever, mintAmmount*adjustment)
+    token.mint(mintReciever, adjustedAmmount)
         .then(tx=>{
             tx.wait()
         }).then(()=>reloadBalances())
