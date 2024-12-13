@@ -106,16 +106,6 @@ function tkToWeis(ammountInTK, token){
                 document.getElementById('price-tkb-msg').innerText = err.reason
             })
 
-        
-
-        /*
-//TODO        const image = await provider.getAvatar()
-//          <img alt="avatar" src="">${image}</img>
-*/ 
-/*
-        const resolver = await provider.getResolver(address)
-        const image = await resolver.getText('avatar') 
-*/
         document.getElementById("navbar--login").innerHTML = `
             <h4>${address}</h4>
             <button onclick="onClickBtnLogout()">Disconnect my wallet</button>
@@ -209,14 +199,6 @@ function tkToWeis(ammountInTK, token){
                 document.getElementById('liquidity-error').innerText = err.reason
             })
     }
-/*
-async function Escribir() {
-    let value2Change = document.getElementById("value2change").value;
-    alert(value2Change);
-
-    const tx = await greeterContract.setGreeting(value2Change);
-    await tx.wait();
-}*/
 
 function onSubmitFormMintMoney(form, event){
     event.preventDefault()
