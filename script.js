@@ -86,21 +86,21 @@ function tkToWeis(ammountInTK, token){
 
         
         simpleDExContract.getLiquidityPoolTokenA()
-            .then(lp => document.getElementById('lp-tka').innerText = lp/TokenA.decimals)
+            .then(lp => document.getElementById('lp-tka').innerText = weisToTK(lp, TokenA))
 
         simpleDExContract.getLiquidityPoolTokenB()
-            .then(lp => document.getElementById('lp-tkb').innerText = lp/TokenB.decimals)
+            .then(lp => document.getElementById('lp-tkb').innerText = weisToTK(lp, TokenB))
         
 
         simpleDExContract.getPrice(TokenA.address)
-            .then(price => document.getElementById('price-tka').innerText = price/TokenA.decimals)
+            .then(price => document.getElementById('price-tka').innerText = price )
             .catch(err => {
                 document.getElementById('price-tka').innerText = '-'
                 document.getElementById('price-tka-msg').innerText = err.reason
             })
 
         simpleDExContract.getPrice(TokenB.address)
-            .then(price => document.getElementById('price-tkb').innerText = price/TokenB.decimals)
+            .then(price => document.getElementById('price-tkb').innerText = price)
             .catch(err => {
                 document.getElementById('price-tkb').innerText = '-'
                 document.getElementById('price-tkb-msg').innerText = err.reason
