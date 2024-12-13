@@ -93,14 +93,14 @@ function tkToWeis(ammountInTK, token){
         
 
         simpleDExContract.getPrice(TokenA.address)
-            .then(price => document.getElementById('price-tka').innerText = price )
+            .then(price => document.getElementById('price-tka').innerText = weisToTK(price, TokenA) )
             .catch(err => {
                 document.getElementById('price-tka').innerText = '-'
                 document.getElementById('price-tka-msg').innerText = err.reason
             })
 
         simpleDExContract.getPrice(TokenB.address)
-            .then(price => document.getElementById('price-tkb').innerText = price)
+            .then(price => document.getElementById('price-tkb').innerText = weisToTK(price, TokenB))
             .catch(err => {
                 document.getElementById('price-tkb').innerText = '-'
                 document.getElementById('price-tkb-msg').innerText = err.reason
