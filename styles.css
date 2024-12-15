@@ -88,6 +88,13 @@ fieldset{
     font-style: italic;
 }
 
+.confirm-msg{
+    color: yellowgreen;
+    font-style: italic;
+    max-width: 20em;
+    text-align: justify;
+}
+
 table {
     text-align: center;
     font-family: arial, sans-serif;

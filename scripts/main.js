@@ -186,7 +186,7 @@ async function onClickBtnShowLP() {
         const liquidityToken = elements['liquidityToken'].value
         
         const doModification = liquidityVerb === 'Add'? 
-            l => SimpleDEx.addLiquidity(l): l => SimpleDEx.removeLiquidity(l)
+            (la, lb) => SimpleDEx.addLiquidity(la, lb): (la, lb) => SimpleDEx.removeLiquidity(la, lb)
 
         let token = liquidityToken == 'A'? TokenA: TokenB
         
@@ -195,11 +195,10 @@ async function onClickBtnShowLP() {
         const args = liquidityToken == TokenA.name?
             [adjustedAmmount, 0]: [0, adjustedAmmount]
 
-        doModification(...args)
-            .then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
-            .catch(err => {
-                document.getElementById('liquidity-error').innerText = err.reason ?? err
-            })
+        const msg = document.getElementById('liquidity-msg')
+        const button = elements['liquiditySubmit']
+    
+        processSubmit(button, msg, ()=>doModification(...args))
     }
 
 function onSubmitFormMintMoney(form, event){
@@ -215,9 +214,26 @@ function onSubmitFormMintMoney(form, event){
     
     const adjustedAmmount = mintUnit === 'Weis'? mintAmmount: (mintToken === TokenA.name? TokenA: TokenB).convertTKToWeis(mintAmmount)
     
-    token.mint(mintReciever, adjustedAmmount)
-        .then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
+    const msg = document.getElementById('mint-msg')
+    const button = elements['mintSubmit']
+    
+    processSubmit(button, msg, ()=>token.mint(mintReciever, adjustedAmmount))
+}
+
+function processSubmit(button, msg, action){
+    button.disabled = true
+    button.title = 'in progress...'
+    action()
+        .then(()=>{
+            msg.innerText = 'Succesfull transaction. To read the updated status, refresh both datasets'
+            msg.className = 'confirm-msg'
+        })
         .catch(err => {
-            document.getElementById('mint-error').innerText = err.reason ?? err
+            msg.innerText = err.reason ?? err
+            msg.className = 'error-msg'
+        })
+        .then(()=> {
+            button.disabled = false
+            button.title = ''
         })
 }

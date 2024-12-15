@@ -35,6 +35,7 @@ class Token{
     async mint(to, ammount){
         this.validateConnectedContract()
         return this.contract.mint(to, ammount)
+            .then(tx => tx.wait())
     }
 
 

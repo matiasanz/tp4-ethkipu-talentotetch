@@ -84,9 +84,9 @@
                         </select>
                     </div>
                     <br>
-                    <input type="submit" value="Confirm">
+                    <input name="liquiditySubmit" type="submit" value="Confirm">
                 </fieldset>
-                <p id="liquidity-error" class="error-msg"></p>
+                <p id="liquidity-msg"></p>
             </form>
 
             <form onsubmit="onSubmitFormMintMoney(this, event)">
@@ -108,9 +108,9 @@
                         </select>
                     </div>
                     <br>
-                    <input type="submit" value="Confirm">
+                    <input name="mintSubmit" type="submit" value="Confirm">
                 </fieldset>
-                <p id="mint-error" class="error-msg"></p>
+                <p id="mint-msg"></p>
             </form>
             <p class="bottom-msj">Note: If you aren't the owner of Simple<br>DEx contract, all transactions of this<br>section will revert.</p>
         </section>
