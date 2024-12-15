@@ -30,9 +30,9 @@ const TokenB = new Token(
 
 
 
-let signer      = null
-let tkaContract = null
-let tkbContract = null
+let signerAddress = null
+let tkaContract   = null
+let tkbContract   = null
 let simpleDExContract = null
 
 // Login
@@ -72,7 +72,7 @@ async function onClickBtnShowAccountStatus(){
         </tbody>
     `
 
-    const address = await signer.getAddress();
+    const address = signerAddress;
 
     tkaContract.balanceOf(address)
         .then( balance => document.getElementById('balance-tka').innerText = weisToTK(balance, TokenA))
@@ -147,8 +147,8 @@ async function onClickBtnShowLP() {
         // Solicitar conexión a MetaMask
         await ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.providers.Web3Provider(ethereum)
-        signer = provider.getSigner();
-        const address = await signer.getAddress();
+        const signer = provider.getSigner();
+        signerAddress = await signer.getAddress();
 
         //const scrollSepoliaProvider = new ethers.providers.JsonRpcProvider('https://scroll-sepolia-rpc.publicnode.com')
         tkaContract = new ethers.Contract(TokenA.address, TokenA.abi, signer)
@@ -163,7 +163,7 @@ async function onClickBtnShowLP() {
         )
     
         document.getElementById("navbar--login").innerHTML = `
-            <h4>${address}</h4>
+            <h4>${signerAddress}</h4>
             <button onclick="onClickBtnLogout()">Disconnect my wallet</button>
         `
         document.getElementById('content').hidden=false
