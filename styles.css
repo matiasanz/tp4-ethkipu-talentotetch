@@ -104,8 +104,10 @@ td, th {
 
 .last-update-msj{
     color: white;
+    font-style: italic;
 }
 
 .bottom-msj{
     font-style: italic;
+    text-align: justify;
 }
