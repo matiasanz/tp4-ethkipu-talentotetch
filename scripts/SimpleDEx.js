@@ -10,11 +10,7 @@ class SimpleDExContract{
     }
 
     validateInitialized(){
-        if(!this){
-            alert('Por alguna razon, no le gusta el <<this>>')
-        }
         if(!this.contract){
-            alert('SimpleDEx wasnt initialized')
             throw new Error('SimpleDEx is not initialized')
         }
     }
