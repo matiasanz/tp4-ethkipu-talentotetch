@@ -1,3 +1,15 @@
+// Utils
+// Unit adapters
+function weisToTK(ammountInWeis, token){
+    return ethers.utils.formatUnits(ammountInWeis, token.decimals)
+}
+
+function tkToWeis(ammountInTK, token){
+    return ethers.utils.parseUnits(ammountInTK, token.decimals)
+}
+
+
+// Class Token
 class Token{
     constructor(address, abi, name, unit, decimals, ){
         this.address = address
@@ -9,10 +21,27 @@ class Token{
         this.decimals = decimals
     }
 
-    /*
+    
     connectContract(signer){
         this.contract = new ethers.Contract(this.address, this.abi, signer)
-    }*/
+    }
+
+    validateConnectedContract(){
+        if(!this.contract)
+            throw new Error('Contract is not connected')
+    }
+
+    async getBalanceOf(signerAddress){
+        this.validateConnectedContract()
+        return this.contract.balanceOf(signerAddress)
+            .then( balance => weisToTK(balance, this))
+    }
+
+    async getAllowanceOf(tokenAddress, contractAddress){
+        this.validateConnectedContract()
+        return this.contract.allowance(tokenAddress, contractAddress)
+            .then(allowance => weisToTK(allowance, TokenB))
+    }
 }
 
 // Global values
@@ -31,14 +60,3 @@ const TokenB = new Token(
     'TKB',
     18
 )
-
-// Utils
-// Unit adapters
-    function weisToTK(ammountInWeis, token){
-        return ethers.utils.formatUnits(ammountInWeis, token.decimals)
-    }
-
-    function tkToWeis(ammountInTK, token){
-        return ethers.utils.parseUnits(ammountInTK, token.decimals)
-    }
-

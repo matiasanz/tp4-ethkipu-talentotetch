@@ -1,8 +1,6 @@
 const SIMPLE_DEx_ADDRESS = '0x0718c693044DB2A66159bA3D97ADdd6bCCdB0d98'
 
 let signerAddress = null
-let tkaContract   = null
-let tkbContract   = null
 let simpleDExContract = null
 
 // Login
@@ -36,15 +34,17 @@ async function onClickBtnShowAccountStatus(){
 
     const address = signerAddress;
 
-    tkaContract.balanceOf(address)
-        .then( balance => document.getElementById('balance-tka').innerText = weisToTK(balance, TokenA))
-    tkbContract.balanceOf(address)
-        .then(balance => document.getElementById('balance-tkb').innerText = weisToTK(balance, TokenB))
+    TokenA.getBalanceOf(address)
+        .then(balance => document.getElementById('balance-tka').innerText = balance)
 
-    tkaContract.allowance(address, SIMPLE_DEx_ADDRESS)
-        .then( allowance => document.getElementById('allowance-tka').innerText = weisToTK(allowance, TokenA))
-    tkbContract.allowance(address, SIMPLE_DEx_ADDRESS)
-        .then(allowance => document.getElementById('allowance-tkb').innerText = weisToTK(allowance, TokenB))
+    TokenB.getBalanceOf(address)
+        .then(balance => document.getElementById('balance-tkb').innerText = balance)
+
+    TokenA.getAllowanceOf(address, SIMPLE_DEx_ADDRESS)
+        .then( allowance => document.getElementById('allowance-tka').innerText = allowance)
+
+    TokenB.getAllowanceOf(address, SIMPLE_DEx_ADDRESS)
+        .then( allowance => document.getElementById('allowance-tkb').innerText = allowance )
 }
 
 async function onClickBtnShowLP() {
@@ -113,8 +113,8 @@ async function onClickBtnShowLP() {
         signerAddress = await signer.getAddress();
 
         //const scrollSepoliaProvider = new ethers.providers.JsonRpcProvider('https://scroll-sepolia-rpc.publicnode.com')
-        tkaContract = new ethers.Contract(TokenA.address, TokenA.abi, signer)
-        tkbContract = new ethers.Contract(TokenB.address, TokenB.abi, signer)
+        TokenA.connectContract(signer)
+        TokenB.connectContract(signer)
 
         simpleDExContract = new ethers.Contract(
             SIMPLE_DEx_ADDRESS,
