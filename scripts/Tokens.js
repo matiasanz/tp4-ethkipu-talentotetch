@@ -14,6 +14,10 @@ class Token{
         this.contract = new ethers.Contract(this.address, this.abi, signer)
     }
 
+    disconnect(){
+        this.contract = null
+    }
+
     validateConnectedContract(){
         if(!this.contract)
             throw new Error('Contract is not connected')

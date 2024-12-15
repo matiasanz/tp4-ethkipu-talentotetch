@@ -9,6 +9,10 @@ class SimpleDExContract{
         )
     }
 
+    disconnect(){
+        this.contract = null
+    }
+
     validateInitialized(){
         if(!this.contract){
             throw new Error('SimpleDEx is not initialized')
