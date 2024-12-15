@@ -18,13 +18,13 @@ async function onClickBtnShowAccountStatus(){
         <tbody>
             <tr>
                 <td>Token A</td>
-                <td><span id="balance-tka">loading...</span> TKA</td>
-                <td><span id="allowance-tka">loading...</span> TKA</td>
+                <td><span id="balance-tka">loading...</span> TK</td>
+                <td><span id="allowance-tka">loading...</span> TK</td>
             </tr>
             <tr>
                 <td>Token B</td>
-                <td><span id="balance-tkb">loading...</span> TKB</td>
-                <td><span id="allowance-tkb">loading...</span> TKB</td>
+                <td><span id="balance-tkb">loading...</span> TK</td>
+                <td><span id="allowance-tkb">loading...</span> TK</td>
             </tr>
         </tbody>
     `
@@ -57,7 +57,7 @@ async function onClickBtnShowLP() {
         </thead>
         <tr>
             <td>Token A</td>
-            <td><span id="lp-tka">loading...</span> TKA</td>
+            <td><span id="lp-tka">loading...</span> TK</td>
             <td><span id="price-tka">loading...</span></td>
         </tr>
         <tr>
@@ -65,7 +65,7 @@ async function onClickBtnShowLP() {
         </tr>
         <tr>
             <td>Token B</td>
-            <td><span id="lp-tkb">loading...</span> TKB</td>
+            <td><span id="lp-tkb">loading...</span> TK</td>
             <td><span id="price-tkb">loading...</span></td>
         </tr>
         <tr>
