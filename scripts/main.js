@@ -157,9 +157,9 @@ async function onClickBtnShowLP() {
 
         const adjustedAmmount = unit === 'Weis'? ammount: token.convertTKToWeis(ammount)
         
-        doSwap(adjustedAmmount)
-            .then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
-            .catch(err => document.getElementById('swap-error').innerText = err.reason ?? err)
+        const button = elements['swapSubmit']
+        const msg = document.getElementById('swap-msg')
+        processSubmit(button, msg, () => doSwap(adjustedAmmount))
     }
 
     function onClickBtnSwitchTokenToSwap(){
