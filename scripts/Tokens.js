@@ -1,14 +1,3 @@
-// Utils
-// Unit adapters
-function weisToTK(ammountInWeis, token){
-    return ethers.utils.formatUnits(ammountInWeis, token.decimals)
-}
-
-function tkToWeis(ammountInTK, token){
-    return ethers.utils.parseUnits(ammountInTK, token.decimals)
-}
-
-
 // Class Token
 class Token{
     constructor(address, abi, name, unit, decimals, ){
@@ -34,13 +23,28 @@ class Token{
     async getBalanceOf(signerAddress){
         this.validateConnectedContract()
         return this.contract.balanceOf(signerAddress)
-            .then( balance => weisToTK(balance, this))
+            .then( balance => this.convertWeisToTK(balance))
     }
 
     async getAllowanceOf(tokenAddress, contractAddress){
         this.validateConnectedContract()
         return this.contract.allowance(tokenAddress, contractAddress)
-            .then(allowance => weisToTK(allowance, TokenB))
+            .then(allowance => this.convertWeisToTK(allowance, TokenB))
+    }
+
+    async mint(to, ammount){
+        this.validateConnectedContract()
+        return this.contract.mint(to, ammount)
+    }
+
+
+    // Unit adapters
+    convertWeisToTK(ammountInWeis){
+        return ethers.utils.formatUnits(ammountInWeis, this.decimals)
+    }
+
+    convertTKToWeis(ammountInTK){
+        return ethers.utils.parseUnits(ammountInTK, this.decimals)
     }
 }
 

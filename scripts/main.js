@@ -1,7 +1,4 @@
-const SIMPLE_DEx_ADDRESS = '0x0718c693044DB2A66159bA3D97ADdd6bCCdB0d98'
-
 let signerAddress = null
-let simpleDExContract = null
 
 // Login
 
@@ -76,25 +73,24 @@ async function onClickBtnShowLP() {
         </tr>
     `
 
-    simpleDExContract.getLiquidityPoolTokenA()
-        .then(lp => document.getElementById('lp-tka').innerText = weisToTK(lp, TokenA))
+    SimpleDEx.getLiquidityPoolTokenA(TokenA)
+        .then(lp => document.getElementById('lp-tka').innerText = lp)
 
-    simpleDExContract.getLiquidityPoolTokenB()
-        .then(lp => document.getElementById('lp-tkb').innerText = weisToTK(lp, TokenB))
+    SimpleDEx.getLiquidityPoolTokenB(TokenB)
+        .then(lp => document.getElementById('lp-tkb').innerText = lp)
 
-
-    simpleDExContract.getPrice(TokenA.address)
-        .then(price => document.getElementById('price-tka').innerText = weisToTK(price, TokenA) )
+    SimpleDEx.getPrice(TokenA)
+        .then(price => document.getElementById('price-tka').innerText = price )
         .catch(err => {
             document.getElementById('price-tka').innerText = '-'
-            document.getElementById('price-tka-msg').innerText = err.reason
+            document.getElementById('price-tka-msg').innerText = err.reason ?? err
         })
 
-    simpleDExContract.getPrice(TokenB.address)
-        .then(price => document.getElementById('price-tkb').innerText = weisToTK(price, TokenB))
+    SimpleDEx.getPrice(TokenB)
+        .then(price => document.getElementById('price-tkb').innerText = price)
         .catch(err => {
             document.getElementById('price-tkb').innerText = '-'
-            document.getElementById('price-tkb-msg').innerText = err.reason
+            document.getElementById('price-tkb-msg').innerText = err.reason ?? err
         })
 }
 
@@ -116,11 +112,7 @@ async function onClickBtnShowLP() {
         TokenA.connectContract(signer)
         TokenB.connectContract(signer)
 
-        simpleDExContract = new ethers.Contract(
-            SIMPLE_DEx_ADDRESS,
-            [{"inputs":[{"internalType":"contract ERC20","name":"_tokenA","type":"address"},{"internalType":"contract ERC20","name":"_tokenB","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedAForB","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedBForA","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKA","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKB","type":"uint256"}],"name":"UpdatedLiquidity","type":"event"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"addLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenA","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenB","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"}],"name":"getPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"removeLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountAIn","type":"uint256"}],"name":"swapAForB","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountBIn","type":"uint256"}],"name":"swapBForA","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}],
-            signer
-        )
+        SimpleDEx.initialize(signer)
     
         document.getElementById("navbar--login").innerHTML = `
             <h4>${signerAddress}</h4>
@@ -153,23 +145,21 @@ async function onClickBtnShowLP() {
         const tokenIn =  document.getElementById('form-swap--tokenIn--id').innerText
         const unit = elements['swapUnit'].value
 
-        let promise = null; 
+        let doSwap = null; 
         let token = null
         if(tokenIn == 'A'){
             token = TokenA
-            promise = simpleDExContract.swapAForB
+            doSwap = a => SimpleDEx.swapAForB(a)
         } else{
             token = TokenB
-            promise = simpleDExContract.swapBForA
+            doSwap = b => SimpleDEx.swapBForA(b)
         }
 
-        const adjustedAmmount = unit === 'Weis'? ammount: tkToWeis(ammount, token)
+        const adjustedAmmount = unit === 'Weis'? ammount: token.convertTKToWeis(ammount)
         
-        promise(adjustedAmmount).then(
-            async(tx) => {
-                await tx.wait()
-            }
-        ).catch(err => document.getElementById('swap-error').innerText = err.reason)
+        doSwap(adjustedAmmount)
+            .then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
+            .catch(err => document.getElementById('swap-error').innerText = err.reason ?? err)
     }
 
     function onClickBtnSwitchTokenToSwap(){
@@ -195,21 +185,20 @@ async function onClickBtnShowLP() {
         const liquidityVerb = elements['liquidityVerb'].value
         const liquidityToken = elements['liquidityToken'].value
         
-        const promise = liquidityVerb === 'Add'? 
-            simpleDExContract.addLiquidity: simpleDExContract.removeLiquidity
+        const doModification = liquidityVerb === 'Add'? 
+            l => SimpleDEx.addLiquidity(l): l => SimpleDEx.removeLiquidity(l)
 
         let token = liquidityToken == 'A'? TokenA: TokenB
         
-        const adjustedAmmount = liquidityUnit === 'Weis'? liquidityAmmount: tkToWeis(liquidityAmmount, token)
+        const adjustedAmmount = liquidityUnit === 'Weis'? liquidityAmmount: token.convertTKToWeis(liquidityAmmount)
         
         const args = liquidityToken == TokenA.name?
             [adjustedAmmount, 0]: [0, adjustedAmmount]
 
-        promise(...args)
-            .then(tx=> tx.wait())
+        doModification(...args)
             .then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
             .catch(err => {
-                document.getElementById('liquidity-error').innerText = err.reason
+                document.getElementById('liquidity-error').innerText = err.reason ?? err
             })
     }
 
@@ -222,13 +211,13 @@ function onSubmitFormMintMoney(form, event){
     const mintReciever = elements['mintReciever'].value
     const mintAmmount = elements['mintAmmount'].value
 
-    const token = mintToken === TokenA.name? tkaContract: tkbContract
+    const token = mintToken === TokenA.name? TokenA: TokenB
     
-    const adjustedAmmount = mintUnit === 'Weis'? mintAmmount: tkToWeis(mintAmmount, mintToken === TokenA.name? TokenA: TokenB)
+    const adjustedAmmount = mintUnit === 'Weis'? mintAmmount: (mintToken === TokenA.name? TokenA: TokenB).convertTKToWeis(mintAmmount)
     
     token.mint(mintReciever, adjustedAmmount)
-        .then(tx=>tx.wait()).then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
+        .then(()=>alert('Succesfull transaction. To read the updated status, refresh both datasets'))
         .catch(err => {
-            document.getElementById('mint-error').innerText = err.reason
+            document.getElementById('mint-error').innerText = err.reason ?? err
         })
 }
