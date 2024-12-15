@@ -45,14 +45,97 @@ function tkToWeis(ammountInTK, token){
     return ethers.utils.parseUnits(ammountInTK, token.decimals)
 }
 
+function getTimeString(){
+    return new Date().toTimeString().slice(0, 17)
+}
+
+async function onClickBtnShowAccountStatus(){
+    document.getElementById('account-status-btn').innerText = `Refresh`
+    document.getElementById('account-status-last-update').innerText = `(last update: ${getTimeString()})`
+    document.getElementById('account-status-content').innerHTML = `
+        <thead>
+            <th></th>
+            <th>Balance</th>
+            <th>Allowance</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Token A</td>
+                <td><span id="balance-tka">loading...</span> TKA</td>
+                <td><span id="allowance-tka">loading...</span> TKA</td>
+            </tr>
+            <tr>
+                <td>Token B</td>
+                <td><span id="balance-tkb">loading...</span> TKB</td>
+                <td><span id="allowance-tkb">loading...</span> TKB</td>
+            </tr>
+        </tbody>
+    `
+
+    const address = await signer.getAddress();
+
+    tkaContract.balanceOf(address)
+        .then( balance => document.getElementById('balance-tka').innerText = weisToTK(balance, TokenA))
+    tkbContract.balanceOf(address)
+        .then(balance => document.getElementById('balance-tkb').innerText = weisToTK(balance, TokenB))
+
+    tkaContract.allowance(address, SIMPLE_DEx_ADDRESS)
+        .then( allowance => document.getElementById('allowance-tka').innerText = weisToTK(allowance, TokenA))
+    tkbContract.allowance(address, SIMPLE_DEx_ADDRESS)
+        .then(allowance => document.getElementById('allowance-tkb').innerText = weisToTK(allowance, TokenB))
+}
+
+async function onClickBtnShowLP() {
+    document.getElementById('lp-btn').innerText = 'Refresh'
+    document.getElementById('lp-last-update').innerText = `(last update: ${getTimeString()})`
+    document.getElementById('lp-content').innerHTML = `
+        <thead>
+            <tr>
+                <th></th>
+                <th>Liquidity</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>Token A</td>
+            <td><span id="lp-tka">loading...</span> TKA</td>
+            <td><span id="price-tka">loading...</span></td>
+        </tr>
+        <tr>
+            <td id="price-tka-msg" colspan="3"></td>
+        </tr>
+        <tr>
+            <td>Token B</td>
+            <td><span id="lp-tkb">loading...</span> TKB</td>
+            <td><span id="price-tkb">loading...</span></td>
+        </tr>
+        <tr>
+            <td id="price-tkb-msg" colspan="3"></td>
+        </tr>
+    `
+
+    simpleDExContract.getLiquidityPoolTokenA()
+        .then(lp => document.getElementById('lp-tka').innerText = weisToTK(lp, TokenA))
+
+    simpleDExContract.getLiquidityPoolTokenB()
+        .then(lp => document.getElementById('lp-tkb').innerText = weisToTK(lp, TokenB))
 
 
-    function reloadBalances(address){
-        tkaContract.balanceOf(address)
-            .then( balance => document.getElementById('balance-tka').innerText = weisToTK(balance, TokenA))
-        tkbContract.balanceOf(address)
-            .then(balance => document.getElementById('balance-tkb').innerText = weisToTK(balance, TokenB))
-    }
+    simpleDExContract.getPrice(TokenA.address)
+        .then(price => document.getElementById('price-tka').innerText = weisToTK(price, TokenA) )
+        .catch(err => {
+            document.getElementById('price-tka').innerText = '-'
+            document.getElementById('price-tka-msg').innerText = err.reason
+        })
+
+    simpleDExContract.getPrice(TokenB.address)
+        .then(price => document.getElementById('price-tkb').innerText = weisToTK(price, TokenB))
+        .catch(err => {
+            document.getElementById('price-tkb').innerText = '-'
+            document.getElementById('price-tkb-msg').innerText = err.reason
+        })
+}
+
 
     async function onClickBtnLogin() {
         if (!window.ethereum) {
@@ -71,41 +154,14 @@ function tkToWeis(ammountInTK, token){
         tkaContract = new ethers.Contract(TokenA.address, TokenA.abi, signer)
         tkbContract = new ethers.Contract(TokenB.address, TokenB.abi, signer)
 
-        reloadBalances(address)
-
-        tkaContract.allowance(address, SIMPLE_DEx_ADDRESS)
-            .then( allowance => document.getElementById('allowance-tka').innerText = weisToTK(allowance, TokenA))
-        tkbContract.allowance(address, SIMPLE_DEx_ADDRESS)
-            .then(allowance => document.getElementById('allowance-tkb').innerText = weisToTK(allowance, TokenB))
+//        reloadBalances(address)
 
         simpleDExContract = new ethers.Contract(
             SIMPLE_DEx_ADDRESS,
             [{"inputs":[{"internalType":"contract ERC20","name":"_tokenA","type":"address"},{"internalType":"contract ERC20","name":"_tokenB","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedAForB","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amountOut","type":"uint256"}],"name":"SwappedBForA","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKA","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"liquidityPoolTKB","type":"uint256"}],"name":"UpdatedLiquidity","type":"event"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"addLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenA","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getLiquidityPoolTokenB","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"}],"name":"getPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountA","type":"uint256"},{"internalType":"uint256","name":"_amountB","type":"uint256"}],"name":"removeLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountAIn","type":"uint256"}],"name":"swapAForB","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amountBIn","type":"uint256"}],"name":"swapBForA","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}],
             signer
         )
-
-        
-        simpleDExContract.getLiquidityPoolTokenA()
-            .then(lp => document.getElementById('lp-tka').innerText = weisToTK(lp, TokenA))
-
-        simpleDExContract.getLiquidityPoolTokenB()
-            .then(lp => document.getElementById('lp-tkb').innerText = weisToTK(lp, TokenB))
-        
-
-        simpleDExContract.getPrice(TokenA.address)
-            .then(price => document.getElementById('price-tka').innerText = weisToTK(price, TokenA) )
-            .catch(err => {
-                document.getElementById('price-tka').innerText = '-'
-                document.getElementById('price-tka-msg').innerText = err.reason
-            })
-
-        simpleDExContract.getPrice(TokenB.address)
-            .then(price => document.getElementById('price-tkb').innerText = weisToTK(price, TokenB))
-            .catch(err => {
-                document.getElementById('price-tkb').innerText = '-'
-                document.getElementById('price-tkb-msg').innerText = err.reason
-            })
-
+    
         document.getElementById("navbar--login").innerHTML = `
             <h4>${address}</h4>
             <button onclick="onClickBtnLogout()">Disconnect my wallet</button>
@@ -137,7 +193,6 @@ function tkToWeis(ammountInTK, token){
         const tokenIn =  document.getElementById('form-swap--tokenIn--id').innerText
         const unit = elements['swapUnit'].value
 
-        console.log(JSON.stringify({tokenIn, ammount, unit}))
         let promise = null; 
         let token = null
         if(tokenIn == 'A'){
@@ -193,7 +248,7 @@ function tkToWeis(ammountInTK, token){
         promise(...args)
             .then(tx=>{
                 tx.wait()
-                reloadBalances()
+//                reloadBalances()
             })
             .catch(err => {
                 document.getElementById('liquidity-error').innerText = err.reason
@@ -216,7 +271,7 @@ function onSubmitFormMintMoney(form, event){
     token.mint(mintReciever, adjustedAmmount)
         .then(tx=>{
             tx.wait()
-        }).then(()=>reloadBalances())
+        })//.then(()=>reloadBalances())
         .catch(err => {
             document.getElementById('mint-error').innerText = err.reason
         })

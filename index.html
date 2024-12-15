@@ -19,53 +19,17 @@
         <div>
             <section>
                 <h2>Account's status</h2>
-                <table>
-                    <thead>
-                        <th></th>
-                        <th>Balance</th>
-                        <th>Allowance</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Token A</td>
-                            <td><span id="balance-tka">loading...</span> TKA</td>
-                            <td><span id="allowance-tka">loading...</span> TKA</td>
-                        </tr>
-                        <tr>
-                            <td>Token B</td>
-                            <td><span id="balance-tkb">loading...</span> TKB</td>
-                            <td><span id="allowance-tkb">loading...</span> TKB</td>
-                        </tr>
-                    </tbody>
+                <button id="account-status-btn" type="button" onclick="onClickBtnShowAccountStatus()">Show</button>
+                <span class="last-update-msj" id="account-status-last-update"></span>
+                <table id="account-status-content">
                 </table>
             </section>
 
             <section>
                 <h2>Liquidity Pools</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Liquidity</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tr>
-                        <td>Token A</td>
-                        <td><span id="lp-tka">loading...</span> TKA</td>
-                        <td><span id="price-tka">loading...</span></td>
-                    </tr>
-                    <tr>
-                        <td id="price-tka-msg" colspan="3"></td>
-                    </tr>
-                    <tr>
-                        <td>Token B</td>
-                        <td><span id="lp-tkb">loading...</span> TKB</td>
-                        <td><span id="price-tkb">loading...</span></td>
-                    </tr>
-                    <tr>
-                        <td id="price-tkb-msg" colspan="3"></td>
-                    </tr>
+                <button id="lp-btn" type="button" onclick="onClickBtnShowLP()">Show</button>
+                <span class="last-update-msj" id="lp-last-update"></span>
+                <table id="lp-content">
                 </table>
             </section>
         </div>
