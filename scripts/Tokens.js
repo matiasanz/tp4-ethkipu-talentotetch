@@ -41,6 +41,11 @@ class Token{
             .then(tx => tx.wait())
     }
 
+    async permit(ammount, contract){
+        this.validateConnectedContract()
+        return this.contract.approve(contract.address, ammount)
+            .then(tx => tx.wait())
+    }
 
     // Unit adapters
     convertWeisToTK(ammountInWeis){

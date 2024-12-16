@@ -56,6 +56,30 @@
                     <p id="swap-msg"></p>
                 </form>
             </div>
+
+            <div>
+                <form onsubmit="onSubmitFormPermit(this, event)">
+                    <div class="fieldset--title">
+                        <h3>Permit</h3>
+                        <select name="permitToken">
+                            <option>Token A</option>
+                            <option>Token B</option>
+                        </select>
+                    </div>
+                    <fieldset>
+                        <div>
+                            <input required name="permitAmmount" type="number" placeholder="Ammount..." min="0">
+                            <select name="permitUnit">
+                                <option>TK</option>
+                                <option>Weis</option>
+                            </select>
+                        </div>
+                        <br>
+                        <input name="permitSubmit" type="submit" value="Confirm">
+                    </fieldset>
+                    <p id="permit-msg"></p>
+                </form>
+            </div>
         </section>
         <section>
             <h2>Owner's Tools</h2>

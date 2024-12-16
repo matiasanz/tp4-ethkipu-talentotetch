@@ -130,14 +130,14 @@ let signerAddress = null // Address of wallet selected to operate.
                 .then(lp => document.getElementById('lp-tkb').innerText = lp)
 
             SimpleDEx.getPrice(TokenA)
-                .then(price => document.getElementById('price-tka').innerText = price )
+                .then(price => document.getElementById('price-tka').innerText = price + ' TK' )
                 .catch(err => {
                     document.getElementById('price-tka').innerText = '-'
                     document.getElementById('price-tka-msg').innerText = err.reason ?? err
                 })
 
             SimpleDEx.getPrice(TokenB)
-                .then(price => document.getElementById('price-tkb').innerText = price)
+                .then(price => document.getElementById('price-tkb').innerText = price + ' TK')
                 .catch(err => {
                     document.getElementById('price-tkb').innerText = '-'
                     document.getElementById('price-tkb-msg').innerText = err.reason ?? err
@@ -145,44 +145,65 @@ let signerAddress = null // Address of wallet selected to operate.
         }
 
         // Exchanging
-            /** Swaps selected token from wallet's balance, with liquidity pool's balance */
-            function onSubmitFormSwapToken(form, event){
-                event.preventDefault()
-                const elements = form.elements
+            // Swap
+                /** Swaps selected token from wallet's balance, with liquidity pool's balance */
+                function onSubmitFormSwapToken(form, event){
+                    event.preventDefault()
+                    const elements = form.elements
 
-                const ammount = elements['swapAmmount'].value
-                const tokenIn =  document.getElementById('form-swap--tokenIn--id').innerText
-                const unit = elements['swapUnit'].value
+                    const ammount = elements['swapAmmount'].value
+                    const tokenIn =  document.getElementById('form-swap--tokenIn--id').innerText
+                    const unit = elements['swapUnit'].value
 
-                let doSwap = null; 
-                let token = null
-                if(tokenIn == 'A'){
-                    token = TokenA
-                    doSwap = a => SimpleDEx.swapAForB(a)
-                } else{
-                    token = TokenB
-                    doSwap = b => SimpleDEx.swapBForA(b)
+                    let doSwap = null; 
+                    let token = null
+                    if(tokenIn == 'A'){
+                        token = TokenA
+                        doSwap = a => SimpleDEx.swapAForB(a)
+                    } else{
+                        token = TokenB
+                        doSwap = b => SimpleDEx.swapBForA(b)
+                    }
+
+                    const adjustedAmmount = unit === 'Weis'? ammount: token.convertTKToWeis(ammount)
+                    
+                    const button = elements['swapSubmit']
+                    const msg = document.getElementById('swap-msg')
+                    processSubmit(button, msg, () => doSwap(adjustedAmmount))
                 }
 
-                const adjustedAmmount = unit === 'Weis'? ammount: token.convertTKToWeis(ammount)
-                
-                const button = elements['swapSubmit']
-                const msg = document.getElementById('swap-msg')
-                processSubmit(button, msg, () => doSwap(adjustedAmmount))
-            }
-
-            /** Switches selected token to swap: 'A for B' <-> 'B for A' */
-            function onClickBtnSwitchTokenToSwap(){
-                const tokenIn = document.getElementById('form-swap--tokenIn--id')
-                const tokenOut = document.getElementById('form-swap--tokenOut--id')
-                if(tokenIn.innerText === TokenA.shortName){
-                    tokenIn.innerText = 'B'
-                    tokenOut.innerText = TokenA.shortName    
-                } else{
-                    tokenIn.innerText = TokenA.shortName
-                    tokenOut.innerText = 'B'
+                /** Switches selected token to swap: 'A for B' <-> 'B for A' */
+                function onClickBtnSwitchTokenToSwap(){
+                    const tokenIn = document.getElementById('form-swap--tokenIn--id')
+                    const tokenOut = document.getElementById('form-swap--tokenOut--id')
+                    if(tokenIn.innerText === TokenA.shortName){
+                        tokenIn.innerText = 'B'
+                        tokenOut.innerText = TokenA.shortName    
+                    } else{
+                        tokenIn.innerText = TokenA.shortName
+                        tokenOut.innerText = 'B'
+                    }
                 }
-            }
+            
+            // Permit
+                /** Increments allowed number of selected token from the wallet that SimpleDEx contract can operate */
+                function onSubmitFormPermit(form, event){
+                    event.preventDefault()
+        
+                    const elements = form.elements
+                    const permitUnit = elements['permitUnit'].value
+                    const permitToken = elements['permitToken'].value
+                    const permitAmmount = elements['permitAmmount'].value
+        
+                    const token = permitToken === TokenA.name? TokenA: TokenB
+                    
+                    const adjustedAmmount = permitUnit === 'Weis'? permitAmmount: (permitToken === TokenA.name? TokenA: TokenB).convertTKToWeis(permitAmmount)
+                    
+                    const msg = document.getElementById('permit-msg')
+                    const button = elements['permitSubmit']
+                    
+                    processSubmit(button, msg, ()=>token.permit(adjustedAmmount, SimpleDEx))
+                }        
 
         // Owner's tools: Theese can only be executed if the wallet has role of 'Owner' in SimpleDEx contract.
 
