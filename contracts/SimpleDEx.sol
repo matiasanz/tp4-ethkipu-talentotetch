@@ -1,47 +1,51 @@
 // SPDX-License-Identifier: GPL-3.0
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity >=0.8.22 <0.9.0;
-
 /**
- * @title Simple DEx
- * @dev Single owner's Descentralized Exchange for two tokens ERC20
- * @custom:dev-run-script ./scripts/deploy_with_ethers.ts
- */
-
+  * @title Simple DEx
+  * @dev Single owner's Decentralized Exchange for two tokens ERC20
+  * @custom:dev-run-script ./scripts/deploy_with_ethers.ts
+  */
+  
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 contract SimpleDEX is Ownable{
-  // Events
-  /** Evento actualización de liquidez: Se emite al finalizar transacciones que produzcan una
-    * variación en cualquiera de los pooles, es decir, tanto las de agregado y retiro de fondos,
-    * por parte del propietario, como las de swap de divisas, a cargo de los usuarios.
-    */
-    event UpdatedLiquidity(uint256 liquidityPoolTKA, uint256 liquidityPoolTKB);
-
-    // Eventos de swappeo de tokens: Se emiten luego de concretar operaciones de este tipo
-    event SwappedAForB(address user, uint256 amountIn, uint256 amountOut);
-    event SwappedBForA(address user, uint256 amountIn, uint256 amountOut);
-
-  // Liquidity pools services
-    ERC20 immutable tokenA;
-    ERC20 immutable tokenB; 
+    // Events
+    /**
+      * @notice Event emitted after transactions that cause a variation in any of the liquidity pools,
+      * including adding and withdrawing funds by the owner, and currency swaps by users.
+      */
+      event UpdatedLiquidity(uint256 liquidityPoolTKA, uint256 liquidityPoolTKB);
+      
+    /**
+      * @notice Event emitted after completing token swap operations
+      * @param user The address of the user involved in the token swap.
+      * @param amountIn The amount of input tokens swapped.
+      * @param amountOut The amount of output tokens received.
+      */
+      event SwappedAForB(address user, uint256 amountIn, uint256 amountOut);
+      event SwappedBForA(address user, uint256 amountIn, uint256 amountOut);
+      
+    // Liquidity pools services
+    ERC20 immutable private tokenA;
+    ERC20 immutable private tokenB;
 
     constructor(ERC20 _tokenA, ERC20 _tokenB) Ownable(msg.sender){
         tokenA = _tokenA;
         tokenB = _tokenB;
-    }
-
-  // Modifiers  
+    }    
+    
+    // Modifiers
     modifier anyNonZero(uint256 _firstParam, uint256 _secondParam){
         require(_firstParam>0 || _secondParam>0, "At least one parameter must be greater than 0");
         _;
     }
-
- /** Incrementa la liquidez de al menos uno de los pools por medio de un deposito de la cuenta del usuario.
-   * Solo puede ser llamado por el dueño de este contrato, una vez otorgados los permisos de uso de su cuenta
-   * del token deseado.
-   */
+    
+    /**
+      * @notice Increases the liquidity of at least one pool through a deposit from the user's account.
+      * @dev Can only be called by the owner of this contract, once the permissions for using the desired token's account have been granted.
+      * @param _amountA The amount of tokenA to deposit. * @param _amountB The amount of tokenB to deposit.
+      */
     function addLiquidity(uint256 _amountA, uint256 _amountB)
         external onlyOwner anyNonZero(_amountA, _amountB){
         
@@ -56,13 +60,14 @@ contract SimpleDEX is Ownable{
 
         emit UpdatedLiquidity(getLiquidityPoolTokenA(), getLiquidityPoolTokenB());
     }
-
- /** Permite retirar fondos de uno o ambos pools, disminuyendo la liquidez.
-   * Esta función solo puede ser llamada por el propietario del contrato.
-   * Los parametros ingresados corresponden a los montos a retirar, los cuales
-   * no deben superar los saldos de sus respectivos pool.
-   */
-    function removeLiquidity(uint256 _amountA, uint256 _amountB)
+    
+    /**
+      * @notice Allows the owner to withdraw funds from one or both pools, decreasing liquidity.
+      * @dev Can only be called by the owner of this contract. 
+      * @param _amountA The amount of tokenA to withdraw. 
+      * @param _amountB The amount of tokenB to withdraw. 
+      */
+      function removeLiquidity(uint256 _amountA, uint256 _amountB)
         external onlyOwner anyNonZero(_amountA, _amountB) {
         uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA(); 
         require(_liquidityPoolTokenA>=_amountA, "Invalid token A's amount");
@@ -77,13 +82,14 @@ contract SimpleDEX is Ownable{
         transferIfPresentAmount(tokenB, _self, _sender, _amountB, "Failed to transfer token B");
 
         emit UpdatedLiquidity(_liquidityPoolTokenA - _amountA, _liquidityPoolTokenB - _amountB);
-    }
- 
- /** Use esta función para intercambiar el número de tokens 'tokenA' ingresado por parámetro
-   * por una cantidad de 'tokenB' que mantenga el nivel de liquidez actual. Puede ser ejecutada
-   * por cualquier usuario, debiendo este haber otorgado permisos a este contrato para manipular
-   * ambos en su nombre. 
-   */
+    } 
+
+    /**
+      * @notice Use this function to swap the input amount of tokenA for an equivalent amount of tokenB,
+      * maintaining the current liquidity level. 
+      * @dev Can be executed by any user who has granted permissions to this contract to manipulate both tokens on their behalf. 
+      * @param _amountAIn The amount of tokenA to swap. 
+      */
     function swapAForB(uint256 _amountAIn)
         external {
         require(_amountAIn > 0, "Amount to swap must be greater than zero");
@@ -105,12 +111,13 @@ contract SimpleDEX is Ownable{
         emit UpdatedLiquidity(_liquidityPoolTKA + _amountAIn, _liquidityPoolTKB - _amountOut);
     }
 
- /** Use esta función para intercambiar el número de tokens 'tokenB' ingresado por parámetro
-   * por una cantidad de 'tokenA' que mantenga el nivel de liquidez actual. Puede ser ejecutada
-   * por cualquier usuario, debiendo este haber otorgado permisos a este contrato para manipular
-   * ambos en su nombre. 
-   */
-    function swapBForA(uint256 _amountBIn)
+    /**
+      * @notice Use this function to swap the input amount of tokenB for an equivalent amount of tokenA, 
+      * maintaining the current liquidity level. 
+      * @dev Can be executed by any user who has granted permissions to this contract to manipulate both tokens on their behalf. 
+      * @param _amountBIn The amount of tokenB to swap. 
+      */ 
+      function swapBForA(uint256 _amountBIn)
         external {
         require(_amountBIn > 0, "Amount to swap must be greater than zero");
         
@@ -131,11 +138,15 @@ contract SimpleDEX is Ownable{
         emit UpdatedLiquidity(_liquidityPoolTKA - _amountOut, _liquidityPoolTKB + _amountBIn);
     }
 
- /** Auxiliar. Permite calcular la cantidad de dinero a pagar a cambio de un cierto monto de
-   * uno de los token con tal de mantener la liquidez actual, a partir de los saldos actuales 
-   * de ambos pools de liquidez.  
-   */
-    function calculateAmountOut(uint256 _amountIn, uint256 _currentLiquidityIn, uint256 _currentLiquidityOut)
+    /**
+      * @notice Auxiliary function. Calculates the output amount of one token in exchange for an input amount of another token, 
+      * maintaining the current liquidity level, based on the current balances of both liquidity pools. 
+      * @param _amountIn The amount of input tokens. 
+      * @param _currentLiquidityIn The current balance of the input token's liquidity pool. 
+      * @param _currentLiquidityOut The current balance of the output token's liquidity pool. 
+      * @return The amount of output tokens. 
+      */ 
+      function calculateAmountOut(uint256 _amountIn, uint256 _currentLiquidityIn, uint256 _currentLiquidityOut)
         private pure returns(uint256) {
         /* ( Y - dY )( X + dX ) = X Y
          *   Y - dY             = X Y / ( X + dX )
@@ -144,43 +155,56 @@ contract SimpleDEX is Ownable{
          *       dY             = Y dX / ( X + dX )
          */
         return _currentLiquidityOut*_amountIn/( _currentLiquidityIn + _amountIn );        
-    }
+      }  
 
- /// Auxiliar. Retorna el saldo del pool de liquidez del token A.  
-    function getLiquidityPoolTokenA() public view returns(uint256){
+    /**
+      * @notice Auxiliary function. Returns the balance of the tokenA liquidity pool.
+      * @return The balance of the tokenA liquidity pool.
+      */
+      function getLiquidityPoolTokenA() public view returns(uint256){
         return tokenA.balanceOf(address(this));
-    }   
-
- /// Auxiliar. Retorna el saldo del pool de liquidez del token B.  
-    function getLiquidityPoolTokenB() public view returns(uint256){
+      }   
+      
+    /**
+      * @notice Auxiliary function. Returns the balance of the tokenB liquidity pool. 
+      * @return The balance of the tokenB liquidity pool. 
+      */
+      function getLiquidityPoolTokenB() public view returns(uint256){
         return tokenB.balanceOf(address(this));
-    }   
+      }   
+      
+    /**
+      * @notice Returns the price of one unit of the specified token in terms of the other token. 
+      * @dev Calculates the ratio between the balances of the two liquidity pools. 
+      * Can be called by any user. Reverts if the specified token is not associated with this contract. 
+      * @param _token The address of the token. 
+      * @return The price of one unit of the specified token in terms of the other token.
+      */
+      function getPrice(address _token) external view returns(uint256) {
+          uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA();
+          uint256 _liquidityPoolTokenB = getLiquidityPoolTokenB();
+          if(_token == address(tokenA)){
+              require(_liquidityPoolTokenA>0, "Can't calculate price while pool A is empty");
+              return 10**tokenB.decimals()*_liquidityPoolTokenB/_liquidityPoolTokenA;
+          }
 
- /** Retorna la cotización de una unidad del token cuya dirección es ingresada por parámetro, en
-   * la moneda por el otro. Para esto, se calcula la relación entre los saldos de ambos pooles de liquidez.
-   * Puede ser llamada por cualquier usuario y en caso de ingresar la dirección de un token que no
-   * se corresponda con los que estuvieran asociados a este contrato, revierte la operación.
-   */
-    function getPrice(address _token) external view returns(uint256) {
-        uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA();
-        uint256 _liquidityPoolTokenB = getLiquidityPoolTokenB();
-        if(_token == address(tokenA)){
-            require(_liquidityPoolTokenA>0, "Can't calculate price while pool A is empty");
-            return 10**tokenB.decimals()*_liquidityPoolTokenB/_liquidityPoolTokenA;
-        }
+          if(_token == address(tokenB)){
+              require(_liquidityPoolTokenB>0, "Can't calculate price while pool B is empty");
+              return 10**tokenA.decimals()*_liquidityPoolTokenA/_liquidityPoolTokenB;
+          }
 
-        if(_token == address(tokenB)){
-            require(_liquidityPoolTokenB>0, "Can't calculate price while pool B is empty");
-            return 10**tokenA.decimals()*_liquidityPoolTokenA/_liquidityPoolTokenB;
-        }
+          revert("Unrecognized token");
+      }
 
-        revert("Unrecognized token");
-    }
 
- /** Auxiliar. Realiza transferencias del token correspondiente al contrato de la dirección
-   * del primer parámetro, desde la cuenta del segundo hacia la del tercero, en el monto indicado
-   * en el cuarto, siempre y cuando este sea distinto de 0 y revierte la operación en caso de
-   * fallar la transferencia, con el mensaje especificado en el quinto.
+  /**
+   * @notice Auxiliary function to transfer tokens if the amount is greater than zero.
+   * @dev Performs the transfer and reverts the transaction if it fails.
+   * @param _token The ERC20 token to transfer.
+   * @param _from The address from which the tokens will be transferred.
+   * @param _to The address to which the tokens will be transferred.
+   * @param _amount The amount of tokens to transfer.
+   * @param _errorMsg The error message to revert with if the transfer fails.
    */
     function transferIfPresentAmount(
         ERC20 _token,
@@ -195,10 +219,13 @@ contract SimpleDEX is Ownable{
         }
     }
 
-   /** Función Auxiliar para comprobar que el contrato tiene permisos de manipular
-     * los suficientes fondos del usuario del token correspondiente, como para concretar
-     * la transferencia
-     */
+  /**
+   * @notice Auxiliary function to check if the contract has permission to transfer the specified amount of tokens.
+   * @param _token The ERC20 token to check.
+   * @param _from The address from which the tokens will be transferred.
+   * @param _amount The amount of tokens to transfer.
+   * @return True if the contract has permission to transfer the tokens, false otherwise.
+   */
     function allowedTransfer(ERC20 _token, address _from, uint256 _amount) private view returns(bool){
         return _token.allowance(_from, address(this)) >= _amount;
     }
