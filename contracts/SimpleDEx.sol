@@ -30,6 +30,9 @@ contract SimpleDEX is Ownable{
     ERC20 immutable private tokenA;
     ERC20 immutable private tokenB;
 
+    uint256 public liquidityPoolTokenA;
+    uint256 public liquidityPoolTokenB;
+
     constructor(ERC20 _tokenA, ERC20 _tokenB) Ownable(msg.sender){
         tokenA = _tokenA;
         tokenB = _tokenB;
@@ -57,7 +60,9 @@ contract SimpleDEX is Ownable{
         transferIfPresentAmount(tokenA, msg.sender, _self, _amountA, "Failed to transfer TKA");
         transferIfPresentAmount(tokenB, msg.sender, _self, _amountB, "Failed to transfer TKB");
 
-        emit UpdatedLiquidity(getLiquidityPoolTokenA(), getLiquidityPoolTokenB());
+        liquidityPoolTokenA += _amountA;
+        liquidityPoolTokenB += _amountB;
+        emit UpdatedLiquidity(liquidityPoolTokenA, liquidityPoolTokenB);
     }
     
     /**
@@ -68,18 +73,18 @@ contract SimpleDEX is Ownable{
       */
       function removeLiquidity(uint256 _amountA, uint256 _amountB)
         external onlyOwner anyNonZero(_amountA, _amountB) {
-        uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA(); 
-        require(_liquidityPoolTokenA>=_amountA, "Not enough TKA");
+        require(liquidityPoolTokenA>=_amountA, "Not enough TKA");
         
-        uint256 _liquidityPoolTokenB = getLiquidityPoolTokenB();
-        require(_liquidityPoolTokenB>=_amountB, "Not enough TKB");
+        require(liquidityPoolTokenB>=_amountB, "Not enough TKB");
 
         address _self = address(this);
         
         transferIfPresentAmount(tokenA, _self, msg.sender, _amountA, "Failed to transfer TKA");
         transferIfPresentAmount(tokenB, _self, msg.sender, _amountB, "Failed to transfer TKB");
 
-        emit UpdatedLiquidity(_liquidityPoolTokenA - _amountA, _liquidityPoolTokenB - _amountB);
+        liquidityPoolTokenA -=  _amountA;
+        liquidityPoolTokenB -= _amountB;
+        emit UpdatedLiquidity(liquidityPoolTokenA, liquidityPoolTokenB);
     } 
 
     /**
@@ -97,15 +102,15 @@ contract SimpleDEX is Ownable{
         bool _successIn = tokenA.transferFrom(msg.sender, _self, _amountAIn);
         require(_successIn, "Failed to transfer TKA");
 
-        uint256 _liquidityPoolTKA = getLiquidityPoolTokenA();
-        uint256 _liquidityPoolTKB = getLiquidityPoolTokenB();
-
-        uint256 _amountOut = calculateAmountOut(_amountAIn, _liquidityPoolTKA, _liquidityPoolTKB);
+        uint256 _amountOut = calculateAmountOut(_amountAIn, liquidityPoolTokenA, liquidityPoolTokenB);
 
         transferIfPresentAmount(tokenB, _self, msg.sender, _amountOut, "Failed to transfer TKB");
 
+        liquidityPoolTokenA += _amountAIn;
+        liquidityPoolTokenB -= _amountOut;
+
         emit SwappedAForB(msg.sender, _amountAIn, _amountOut);
-        emit UpdatedLiquidity(_liquidityPoolTKA + _amountAIn, _liquidityPoolTKB - _amountOut);
+        emit UpdatedLiquidity(liquidityPoolTokenA, liquidityPoolTokenB);
     }
 
     /**
@@ -123,15 +128,15 @@ contract SimpleDEX is Ownable{
         bool _successIn = tokenB.transferFrom(msg.sender, _self, _amountBIn);
         require(_successIn, "Failed to transfer TKB");
 
-        uint256 _liquidityPoolTKA = getLiquidityPoolTokenA();
-        uint256 _liquidityPoolTKB = getLiquidityPoolTokenB();
-
-        uint256 _amountOut = calculateAmountOut(_amountBIn, _liquidityPoolTKB, _liquidityPoolTKA);
+        uint256 _amountOut = calculateAmountOut(_amountBIn, liquidityPoolTokenB, liquidityPoolTokenA);
         
         transferIfPresentAmount(tokenA, _self, msg.sender, _amountOut, "Failed to transfer token A from contract");
 
+        liquidityPoolTokenA -= _amountOut;
+        liquidityPoolTokenB += _amountBIn;
+
         emit SwappedBForA(msg.sender, _amountBIn, _amountOut);
-        emit UpdatedLiquidity(_liquidityPoolTKA - _amountOut, _liquidityPoolTKB + _amountBIn);
+        emit UpdatedLiquidity(liquidityPoolTokenA, liquidityPoolTokenB);
     }
 
     /**
@@ -154,22 +159,6 @@ contract SimpleDEX is Ownable{
       }  
 
     /**
-      * @notice Auxiliary function. Returns the balance of the tokenA liquidity pool.
-      * @return The balance of the tokenA liquidity pool.
-      */
-      function getLiquidityPoolTokenA() public view returns(uint256){
-        return tokenA.balanceOf(address(this));
-      }   
-      
-    /**
-      * @notice Auxiliary function. Returns the balance of the tokenB liquidity pool. 
-      * @return The balance of the tokenB liquidity pool. 
-      */
-      function getLiquidityPoolTokenB() public view returns(uint256){
-        return tokenB.balanceOf(address(this));
-      }   
-      
-    /**
       * @notice Returns the price of one unit of the specified token in terms of the other token. 
       * @dev Calculates the ratio between the balances of the two liquidity pools. 
       * Can be called by any user. Reverts if the specified token is not associated with this contract. 
@@ -177,16 +166,14 @@ contract SimpleDEX is Ownable{
       * @return The price of one unit of the specified token in terms of the other token.
       */
       function getPrice(address _token) external view returns(uint256) {
-          uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA();
-          uint256 _liquidityPoolTokenB = getLiquidityPoolTokenB();
           if(_token == address(tokenA)){
-              require(_liquidityPoolTokenA>0, "Empty pool A");
-              return 10**tokenB.decimals()*_liquidityPoolTokenB/_liquidityPoolTokenA;
+              require(liquidityPoolTokenA>0, "Empty pool A");
+              return 10**tokenB.decimals()*liquidityPoolTokenB/liquidityPoolTokenA;
           }
 
           if(_token == address(tokenB)){
-              require(_liquidityPoolTokenB>0, "Empty pool B");
-              return 10**tokenA.decimals()*_liquidityPoolTokenA/_liquidityPoolTokenB;
+              require(liquidityPoolTokenB>0, "Empty pool B");
+              return 10**tokenA.decimals()*liquidityPoolTokenA/liquidityPoolTokenB;
           }
 
           revert("Unrecognized token");
