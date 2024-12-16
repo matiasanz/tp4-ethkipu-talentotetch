@@ -12,7 +12,15 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 contract TokenA is ERC20, ERC20Permit {
-    constructor() ERC20("Token A", "TKA") ERC20Permit("Token A") {
-        _mint(msg.sender, 1000 * 10 ** decimals()); //Saldo inicial por usuario
-    }
+    constructor() ERC20("Token A", "TKA") ERC20Permit("Token A") {}
+
+    /**
+      * @notice Function to mint tokens in [weis].
+      * @dev Can only be called by the owner of the contract. 
+      * @param _to The address to which the minted tokens will be sent. 
+      * @param _amount The amount of tokens to be minted. 
+      */
+    function mint(address _to, uint256 _amount) external onlyOwner{
+        _mint(_to, _amount);
+    } 
 }
