@@ -130,7 +130,7 @@ contract SimpleDEX is Ownable{
 
         uint256 _amountOut = calculateAmountOut(_amountBIn, liquidityPoolTokenB, liquidityPoolTokenA);
         
-        transferIfPresentAmount(tokenA, _self, msg.sender, _amountOut, "Failed to transfer token A from contract");
+        transferIfPresentAmount(tokenA, _self, msg.sender, _amountOut, "Failed to transfer TKA");
 
         liquidityPoolTokenA -= _amountOut;
         liquidityPoolTokenB += _amountBIn;
