@@ -95,7 +95,7 @@ contract SimpleDEX is Ownable{
       */
     function swapAForB(uint256 _amountAIn)
         external {
-        require(_amountAIn > 0, "Amount to swap must be greater than zero");
+        require(_amountAIn > 0, "Empty ammount");
         
         address _self = address(this);
         require(allowedTransfer(tokenA, msg.sender, _amountAIn), "Not allowed to transfer TKA");
@@ -121,10 +121,10 @@ contract SimpleDEX is Ownable{
       */ 
       function swapBForA(uint256 _amountBIn)
         external {
-        require(_amountBIn > 0, "Amount lower than zero");
+        require(_amountBIn > 0, "Empty amount");
         
         address _self = address(this);
-        require(allowedTransfer(tokenB, msg.sender, _amountBIn), "Not allowed to transfer token B");
+        require(allowedTransfer(tokenB, msg.sender, _amountBIn), "Not allowed to transfer TKB");
         bool _successIn = tokenB.transferFrom(msg.sender, _self, _amountBIn);
         require(_successIn, "Failed to transfer TKB");
 
