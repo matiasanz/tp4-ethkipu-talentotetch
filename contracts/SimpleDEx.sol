@@ -49,14 +49,13 @@ contract SimpleDEX is Ownable{
     function addLiquidity(uint256 _amountA, uint256 _amountB)
         external onlyOwner anyNonZero(_amountA, _amountB){
         
-        address _sender = msg.sender;
         address _self = address(this);
 
-        require(allowedTransfer(tokenA, _sender, _amountA), "Not allowed to transfer TKA");
-        require(allowedTransfer(tokenB, _sender, _amountA), "Not allowed to transfer TKB");
-
-        transferIfPresentAmount(tokenA, _sender, _self, _amountA, "Failed to transfer TKA");
-        transferIfPresentAmount(tokenB, _sender, _self, _amountB, "Failed to transfer TKB");
+        require(allowedTransfer(tokenA, msg.sender, _amountA), "Not allowed to transfer TKA");
+        require(allowedTransfer(tokenB, msg.sender, _amountA), "Not allowed to transfer TKB");
+        
+        transferIfPresentAmount(tokenA, msg.sender, _self, _amountA, "Failed to transfer TKA");
+        transferIfPresentAmount(tokenB, msg.sender, _self, _amountB, "Failed to transfer TKB");
 
         emit UpdatedLiquidity(getLiquidityPoolTokenA(), getLiquidityPoolTokenB());
     }
@@ -76,10 +75,9 @@ contract SimpleDEX is Ownable{
         require(_liquidityPoolTokenB>=_amountB, "Not enough TKB");
 
         address _self = address(this);
-        address _sender = msg.sender;
         
-        transferIfPresentAmount(tokenA, _self, _sender, _amountA, "Failed to transfer TKA");
-        transferIfPresentAmount(tokenB, _self, _sender, _amountB, "Failed to transfer TKB");
+        transferIfPresentAmount(tokenA, _self, msg.sender, _amountA, "Failed to transfer TKA");
+        transferIfPresentAmount(tokenB, _self, msg.sender, _amountB, "Failed to transfer TKB");
 
         emit UpdatedLiquidity(_liquidityPoolTokenA - _amountA, _liquidityPoolTokenB - _amountB);
     } 
@@ -94,10 +92,9 @@ contract SimpleDEX is Ownable{
         external {
         require(_amountAIn > 0, "Amount to swap must be greater than zero");
         
-        address _sender = msg.sender;
         address _self = address(this);
-        require(allowedTransfer(tokenA, _sender, _amountAIn), "Not allowed to transfer TKA");
-        bool _successIn = tokenA.transferFrom(_sender, _self, _amountAIn);
+        require(allowedTransfer(tokenA, msg.sender, _amountAIn), "Not allowed to transfer TKA");
+        bool _successIn = tokenA.transferFrom(msg.sender, _self, _amountAIn);
         require(_successIn, "Failed to transfer TKA");
 
         uint256 _liquidityPoolTKA = getLiquidityPoolTokenA();
@@ -105,9 +102,9 @@ contract SimpleDEX is Ownable{
 
         uint256 _amountOut = calculateAmountOut(_amountAIn, _liquidityPoolTKA, _liquidityPoolTKB);
 
-        transferIfPresentAmount(tokenB, _self, _sender, _amountOut, "Failed to transfer TKB");
+        transferIfPresentAmount(tokenB, _self, msg.sender, _amountOut, "Failed to transfer TKB");
 
-        emit SwappedAForB(_sender, _amountAIn, _amountOut);
+        emit SwappedAForB(msg.sender, _amountAIn, _amountOut);
         emit UpdatedLiquidity(_liquidityPoolTKA + _amountAIn, _liquidityPoolTKB - _amountOut);
     }
 
@@ -121,10 +118,9 @@ contract SimpleDEX is Ownable{
         external {
         require(_amountBIn > 0, "Amount lower than zero");
         
-        address _sender = msg.sender;
         address _self = address(this);
-        require(allowedTransfer(tokenB, _sender, _amountBIn), "Not allowed to transfer token B");
-        bool _successIn = tokenB.transferFrom(_sender, _self, _amountBIn);
+        require(allowedTransfer(tokenB, msg.sender, _amountBIn), "Not allowed to transfer token B");
+        bool _successIn = tokenB.transferFrom(msg.sender, _self, _amountBIn);
         require(_successIn, "Failed to transfer TKB");
 
         uint256 _liquidityPoolTKA = getLiquidityPoolTokenA();
@@ -132,9 +128,9 @@ contract SimpleDEX is Ownable{
 
         uint256 _amountOut = calculateAmountOut(_amountBIn, _liquidityPoolTKB, _liquidityPoolTKA);
         
-        transferIfPresentAmount(tokenA, _self, _sender, _amountOut, "Failed to transfer token A from contract");
+        transferIfPresentAmount(tokenA, _self, msg.sender, _amountOut, "Failed to transfer token A from contract");
 
-        emit SwappedBForA(_sender, _amountBIn, _amountOut);
+        emit SwappedBForA(msg.sender, _amountBIn, _amountOut);
         emit UpdatedLiquidity(_liquidityPoolTKA - _amountOut, _liquidityPoolTKB + _amountBIn);
     }
 
