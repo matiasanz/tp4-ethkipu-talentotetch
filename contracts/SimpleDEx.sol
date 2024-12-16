@@ -37,7 +37,7 @@ contract SimpleDEX is Ownable{
     
     // Modifiers
     modifier anyNonZero(uint256 _firstParam, uint256 _secondParam){
-        require(_firstParam>0 || _secondParam>0, "At least one parameter must be greater than 0");
+        require(_firstParam>0 || _secondParam>0, "Both params are 0");
         _;
     }
     
@@ -52,11 +52,11 @@ contract SimpleDEX is Ownable{
         address _sender = msg.sender;
         address _self = address(this);
 
-        require(allowedTransfer(tokenA, _sender, _amountA), "Not allowed to transfer token A");
-        require(allowedTransfer(tokenB, _sender, _amountA), "Not allowed to transfer token B");
+        require(allowedTransfer(tokenA, _sender, _amountA), "Not allowed to transfer TKA");
+        require(allowedTransfer(tokenB, _sender, _amountA), "Not allowed to transfer TKB");
 
-        transferIfPresentAmount(tokenA, _sender, _self, _amountA, "Failed to transfer token A from owner");
-        transferIfPresentAmount(tokenB, _sender, _self, _amountB, "Failed to transfer token B from owner");
+        transferIfPresentAmount(tokenA, _sender, _self, _amountA, "Failed to transfer TKA");
+        transferIfPresentAmount(tokenB, _sender, _self, _amountB, "Failed to transfer TKB");
 
         emit UpdatedLiquidity(getLiquidityPoolTokenA(), getLiquidityPoolTokenB());
     }
@@ -70,16 +70,16 @@ contract SimpleDEX is Ownable{
       function removeLiquidity(uint256 _amountA, uint256 _amountB)
         external onlyOwner anyNonZero(_amountA, _amountB) {
         uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA(); 
-        require(_liquidityPoolTokenA>=_amountA, "Invalid token A's amount");
+        require(_liquidityPoolTokenA>=_amountA, "Not enough TKA");
         
         uint256 _liquidityPoolTokenB = getLiquidityPoolTokenB();
-        require(_liquidityPoolTokenB>=_amountB, "Invalid token B's amount");
+        require(_liquidityPoolTokenB>=_amountB, "Not enough TKB");
 
         address _self = address(this);
         address _sender = msg.sender;
         
-        transferIfPresentAmount(tokenA, _self, _sender, _amountA, "Failed to transfer token A");
-        transferIfPresentAmount(tokenB, _self, _sender, _amountB, "Failed to transfer token B");
+        transferIfPresentAmount(tokenA, _self, _sender, _amountA, "Failed to transfer TKA");
+        transferIfPresentAmount(tokenB, _self, _sender, _amountB, "Failed to transfer TKB");
 
         emit UpdatedLiquidity(_liquidityPoolTokenA - _amountA, _liquidityPoolTokenB - _amountB);
     } 
@@ -96,16 +96,16 @@ contract SimpleDEX is Ownable{
         
         address _sender = msg.sender;
         address _self = address(this);
-        require(allowedTransfer(tokenA, _sender, _amountAIn), "Not allowed to transfer token A");
+        require(allowedTransfer(tokenA, _sender, _amountAIn), "Not allowed to transfer TKA");
         bool _successIn = tokenA.transferFrom(_sender, _self, _amountAIn);
-        require(_successIn, "Failed to transfer TKA from sender");
+        require(_successIn, "Failed to transfer TKA");
 
         uint256 _liquidityPoolTKA = getLiquidityPoolTokenA();
         uint256 _liquidityPoolTKB = getLiquidityPoolTokenB();
 
         uint256 _amountOut = calculateAmountOut(_amountAIn, _liquidityPoolTKA, _liquidityPoolTKB);
 
-        transferIfPresentAmount(tokenB, _self, _sender, _amountOut, "Failed to transfer TKB from contract");
+        transferIfPresentAmount(tokenB, _self, _sender, _amountOut, "Failed to transfer TKB");
 
         emit SwappedAForB(_sender, _amountAIn, _amountOut);
         emit UpdatedLiquidity(_liquidityPoolTKA + _amountAIn, _liquidityPoolTKB - _amountOut);
@@ -119,13 +119,13 @@ contract SimpleDEX is Ownable{
       */ 
       function swapBForA(uint256 _amountBIn)
         external {
-        require(_amountBIn > 0, "Amount to swap must be greater than zero");
+        require(_amountBIn > 0, "Amount lower than zero");
         
         address _sender = msg.sender;
         address _self = address(this);
         require(allowedTransfer(tokenB, _sender, _amountBIn), "Not allowed to transfer token B");
         bool _successIn = tokenB.transferFrom(_sender, _self, _amountBIn);
-        require(_successIn, "Failed to transfer token B from sender");
+        require(_successIn, "Failed to transfer TKB");
 
         uint256 _liquidityPoolTKA = getLiquidityPoolTokenA();
         uint256 _liquidityPoolTKB = getLiquidityPoolTokenB();
@@ -184,12 +184,12 @@ contract SimpleDEX is Ownable{
           uint256 _liquidityPoolTokenA = getLiquidityPoolTokenA();
           uint256 _liquidityPoolTokenB = getLiquidityPoolTokenB();
           if(_token == address(tokenA)){
-              require(_liquidityPoolTokenA>0, "Can't calculate price while pool A is empty");
+              require(_liquidityPoolTokenA>0, "Empty pool A");
               return 10**tokenB.decimals()*_liquidityPoolTokenB/_liquidityPoolTokenA;
           }
 
           if(_token == address(tokenB)){
-              require(_liquidityPoolTokenB>0, "Can't calculate price while pool B is empty");
+              require(_liquidityPoolTokenB>0, "Empty pool B");
               return 10**tokenA.decimals()*_liquidityPoolTokenA/_liquidityPoolTokenB;
           }
 
