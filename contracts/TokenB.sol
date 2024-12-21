@@ -10,9 +10,10 @@ pragma solidity >=0.8.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenB is ERC20, ERC20Permit {
-    constructor() ERC20("Token B", "TKB") ERC20Permit("Token B") {}
+contract TokenB is ERC20, ERC20Permit, Ownable {
+    constructor() ERC20("Token B", "TKB") ERC20Permit("Token B") Ownable(msg.sender){}
 
     /**
       * @notice Function to mint tokens in [weis].
